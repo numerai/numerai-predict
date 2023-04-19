@@ -5,7 +5,6 @@ import requests
 import secrets
 import shutil
 import sys
-import tempfile
 import urllib
 
 from numerapi import NumerAPI
@@ -43,7 +42,7 @@ def parse_args():
         data = urllib.parse.parse_qs(args.post_data)
         if type(data) != dict:
             raise argparse.ArgumentError(
-                f"--post_data must be urlencoded and resolve to dict"
+                "--post_data must be urlencoded and resolve to dict"
             )
         args.post_data = data
 

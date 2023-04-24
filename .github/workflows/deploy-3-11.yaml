@@ -1,0 +1,30 @@
+name: Deploy Python 3.11 Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'predict.py'
+      - 'py3.11/**'
+
+jobs:
+  deploy-py311-image:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.NUMERAI_CLOUD_ACCOUNT_ID }}:role/github-actions
+          aws-region: us-west-2
+
+      - name: Build and Push Docker Image
+        id: build-push-docker-image
+        run: |
+          make release_3_11

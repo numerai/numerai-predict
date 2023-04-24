@@ -1,5 +1,5 @@
-NAME		:= numerai-predict_v1
-ECR_REPO	:= public.ecr.aws/x9w3z9p0
+NAME		:= numerai_predict
+ECR_REPO	:= 584380190766.dkr.ecr.us-west-2.amazonaws.com
 GIT_REF     	:= $$(git rev-parse --short HEAD)
 .DEFAULT_GOAL   := help
 
@@ -12,15 +12,15 @@ build:	build_3_9 build_3_10 build_3_11 ## Build all Python containers
 
 .PHONY: build_3_9
 build_3_9: ## Build Python 3.9 container
-	docker build -t ${NAME}_py3.9:${GIT_REF} -t ${NAME}_py3.9:latest -f py3.9/Dockerfile .
+	docker build -t ${NAME}_py_3_9:${GIT_REF} -t ${NAME}_py_3_9:latest -f py3.9/Dockerfile .
 
 .PHONY: build_3_10
 build_3_10: ## Build Python 3.10 container
-	docker build -t ${NAME}_py3.10:${GIT_REF} -t ${NAME}_py3.10:latest -f py3.10/Dockerfile .
+	docker build -t ${NAME}_py_3_10:${GIT_REF} -t ${NAME}_py_3_10:latest -f py3.10/Dockerfile .
 
 .PHONY: build_3_11
 build_3_11: ## Build Python 3.11 container
-	docker build -t ${NAME}_py3.11:${GIT_REF} -t ${NAME}_py3.11:latest -f py3.11/Dockerfile .
+	docker build -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
 
 .PHONY: test
 test: test_3_9 test_3_10 test_3_11 ## Test all container versions
@@ -47,29 +47,29 @@ release: release_3_9 release_3_10 release_3_11 ## Push all container tagged rele
 .PHONY: release_3_9
 release_3_9: ## Release Python 3.9 contianer tagged release
 	git describe --tags --abbrev=0
-	docker build -t ${NAME}_py3.9:${GIT_REF} -t ${NAME}_py3.9:latest -f py3.9/Dockerfile .
+	docker build -t ${NAME}_py_3_9:${GIT_REF} -t ${NAME}_py_3_9:latest -f py3.9/Dockerfile .
 	aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REPO}
-	docker tag ${NAME}_py3.9:${GIT_REF} ${ECR_REPO}/${NAME}_py3.9:${GIT_REF}
-	docker tag ${NAME}_py3.9:latest ${ECR_REPO}/${NAME}_py3.9:latest
-	docker push ${ECR_REPO}/${NAME}_py3.9:${GIT_REF}
-	docker push ${ECR_REPO}/${NAME}_py3.9:latest
+	docker tag ${NAME}_py_3_9:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
+	docker tag ${NAME}_py_3_9:latest ${ECR_REPO}/${NAME}_py_3_9:latest
+	docker push ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_py_3_9:latest
 
 .PHONY: release_3_10
 release_3_10: ## Release Python 3.10 contianer tagged release
 	git describe --tags --abbrev=0
-	docker build -t ${NAME}_py3.10:${GIT_REF} -t ${NAME}_py3.10:latest -f py3.10/Dockerfile .
+	docker build -t ${NAME}_py_3_10:${GIT_REF} -t ${NAME}_py_3_10:latest -f py3.10/Dockerfile .
 	aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REPO}
-	docker tag ${NAME}_py3.10:${GIT_REF} ${ECR_REPO}/${NAME}_py3.10:${GIT_REF}
-	docker tag ${NAME}_py3.10:latest ${ECR_REPO}/${NAME}_py3.10:latest
-	docker push ${ECR_REPO}/${NAME}_py3.10:${GIT_REF}
-	docker push ${ECR_REPO}/${NAME}_py3.10:latest
+	docker tag ${NAME}_py_3_10:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_10:${GIT_REF}
+	docker tag ${NAME}_py_3_10:latest ${ECR_REPO}/${NAME}_py_3_10:latest
+	docker push ${ECR_REPO}/${NAME}_py_3_10:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_py_3_10:latest
 
 .PHONY: release_3_11
 release_3_11: ## Release Python 3.11 contianer tagged release
 	git describe --tags --abbrev=0
-	docker build -t ${NAME}_py3.11:${GIT_REF} -t ${NAME}_py3.11:latest -f py3.11/Dockerfile .
+	docker build -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
 	aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REPO}
-	docker tag ${NAME}_py3.11:${GIT_REF} ${ECR_REPO}/${NAME}_py3.11:${GIT_REF}
-	docker tag ${NAME}_py3.11:latest ${ECR_REPO}/${NAME}_py3.11:latest
-	docker push ${ECR_REPO}/${NAME}_py3.11:${GIT_REF}
-	docker push ${ECR_REPO}/${NAME}_py3.11:latest
+	docker tag ${NAME}_py_3_11:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}
+	docker tag ${NAME}_py_3_11:latest ${ECR_REPO}/${NAME}_py_3_11:latest
+	docker push ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_py_3_11:latest

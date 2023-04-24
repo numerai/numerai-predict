@@ -47,7 +47,7 @@ release: release_3_9 release_3_10 release_3_11 ## Push all container tagged rele
 .PHONY: release_3_9
 release_3_9: ## Release Python 3.9 contianer tagged release
 	docker build -t ${NAME}_py_3_9:${GIT_REF} -t ${NAME}_py_3_9:latest -f py3.9/Dockerfile .
-	aws ecr-public get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
 	docker tag ${NAME}_py_3_9:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
 	docker tag ${NAME}_py_3_9:latest ${ECR_REPO}/${NAME}_py_3_9:latest
 	docker push ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
@@ -56,7 +56,7 @@ release_3_9: ## Release Python 3.9 contianer tagged release
 .PHONY: release_3_10
 release_3_10: ## Release Python 3.10 contianer tagged release
 	docker build -t ${NAME}_py_3_10:${GIT_REF} -t ${NAME}_py_3_10:latest -f py3.10/Dockerfile .
-	aws ecr-public get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
 	docker tag ${NAME}_py_3_10:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_10:${GIT_REF}
 	docker tag ${NAME}_py_3_10:latest ${ECR_REPO}/${NAME}_py_3_10:latest
 	docker push ${ECR_REPO}/${NAME}_py_3_10:${GIT_REF}
@@ -65,7 +65,7 @@ release_3_10: ## Release Python 3.10 contianer tagged release
 .PHONY: release_3_11
 release_3_11: ## Release Python 3.11 contianer tagged release
 	docker build -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
-	aws ecr-public get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
 	docker tag ${NAME}_py_3_11:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}
 	docker tag ${NAME}_py_3_11:latest ${ECR_REPO}/${NAME}_py_3_11:latest
 	docker push ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}

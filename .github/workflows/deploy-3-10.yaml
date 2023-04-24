@@ -1,4 +1,4 @@
-name: Deploy Python 3.9 Image
+name: Deploy Python 3.10 Image
 
 on:
   workflow_dispatch:
@@ -7,10 +7,10 @@ on:
       - master
     paths:
       - 'predict.py'
-      - 'py3.9/**'
+      - 'py3.10/**'
 
 jobs:
-  deploy-py39-image:
+  deploy-py310-image:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -27,4 +27,4 @@ jobs:
       - name: Build and Push Docker Image
         id: build-push-docker-image
         run: |
-          make release_3_9
+          make release_3_10

@@ -27,19 +27,19 @@ test: test_3_9 test_3_10 test_3_11 ## Test all container versions
 
 .PHONY: test_3_9
 test_3_9: build_3_9 ## Test Python 3.9 pickle
-	docker run -i --rm --volume /tmp:/tmp numerai-predict_py3.9:latest --model https://huggingface.co/pschork/hello-numerai-models/resolve/main/model_3.9.pkl
+	docker run -i --rm --volume /tmp:/tmp ${NAME}_py_3_9:latest --model https://huggingface.co/pschork/hello-numerai-models/resolve/main/model_3.9.pkl
 
 .PHONY: test_colab
 test_colab: build_3_9 ## Test Python 3.9 pickle colab export
-	docker run -i --rm --volume /tmp:/tmp numerai-predict_py3.9:latest --model https://huggingface.co/pschork/hello-numerai-models/resolve/main/colab_3.9.16.pkl
+	docker run -i --rm --volume /tmp:/tmp ${NAME}_py_3_9:latest --model https://huggingface.co/pschork/hello-numerai-models/resolve/main/colab_3.9.16.pkl
 
 .PHONY: test_3_10
 test_3_10: build_3_10 ## Test Python 3.10 pickle
-	docker run -i --rm --volume /tmp:/tmp numerai-predict_py3.10:latest --model https://huggingface.co/pschork/hello-numerai-models/resolve/main/model_3.10.pkl
+	docker run -i --rm --volume /tmp:/tmp ${NAME}_py_3_10:latest --model https://huggingface.co/pschork/hello-numerai-models/resolve/main/model_3.10.pkl
 
 .PHONY: test_3_11
 test_3_11: build_3_11 ## Test Python 3.11 pickle
-	docker run -i --rm --volume /tmp:/tmp numerai-predict_py3.11:latest --model https://huggingface.co/pschork/hello-numerai-models/resolve/main/model_3.11.pkl
+	docker run -i --rm --volume /tmp:/tmp ${NAME}_py_3_11:latest --dataset /tmp/v4.1/live.parquet --model https://huggingface.co/pschork/hello-numerai-models/resolve/main/model_3.11.pkl
 
 .PHONY: release
 release: release_3_9 release_3_10 release_3_11 ## Push all container tagged releases

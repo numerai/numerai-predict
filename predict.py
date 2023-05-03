@@ -14,7 +14,9 @@ import pandas as pd
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--dataset", default="v4.1/live.parquet", help="Numerapi dataset path or local file"
+        "--dataset",
+        default="v4.1/live.parquet",
+        help="Numerapi dataset path or local file",
     )
     parser.add_argument("--model", required=True, help="Pickled model file or URL")
     parser.add_argument("--output_dir", default="/tmp", help="File output dir")
@@ -102,7 +104,7 @@ def predict(args):
         logging.info(f"Uploading predictions to {args.post_url}")
         files = {"file": open(predictions_csv, "rb")}
         r = requests.post(args.post_url, data=args.post_data, files=files)
-        if r.status_code != 200:
+        if r.status_code not in [200, 204]:
             logging.error(f"{r.status_code} {r.reason} {r.text}")
             sys.exit(1)
         logging.info(r.status_code)

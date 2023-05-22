@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import pickle
 import requests
 import secrets
 import shutil
@@ -55,7 +56,8 @@ def parse_args():
 
 def predict(args):
     if args.model.lower().startswith("http"):
-        logging.info(f"Downloading model {args.model}")
+        truncated_url = args.model.split("?")[0]
+        logging.info(f"Downloading model {truncated_url}")
         response = requests.get(args.model, stream=True, allow_redirects=True)
         if response.status_code != 200:
             logging.error(f"{response.reason} {response.text}")
@@ -69,7 +71,12 @@ def predict(args):
         model_pkl = args.model
 
     logging.info(f"Loading model {model_pkl}")
-    model = pd.read_pickle(model_pkl)
+    try:
+        model = pd.read_pickle(model_pkl)
+    except pickle.UnpicklingError as e:
+        logging.error("Invalid pickle - unable to unpickle!")
+        logging.debug(e)
+        sys.exit(1)
     logging.debug(model)
 
     if os.path.exists(args.dataset):
@@ -88,7 +95,17 @@ def predict(args):
     live_features = pd.read_parquet(dataset_path)
 
     logging.info(f"Predicting on {len(live_features)} live features")
-    predictions = model(live_features)
+    try:
+        predictions = model(live_features)
+        if predictions is None:
+            logging.error("Pickle function is invalid - returned None")
+            sys.exit(1)
+        elif len(predictions) == 0:
+            logging.error("Pickle function returned 0 predictions")
+            sys.exit(1)
+    except TypeError as e:
+        logging.error(f"Pickle function is invalid - {e}")
+        sys.exit(1)
 
     logging.info(f"Generated {len(predictions)} predictions")
     logging.debug(predictions)
@@ -105,9 +122,9 @@ def predict(args):
         files = {"file": open(predictions_csv, "rb")}
         r = requests.post(args.post_url, data=args.post_data, files=files)
         if r.status_code not in [200, 204]:
-            logging.error(f"{r.status_code} {r.reason} {r.text}")
+            logging.error(f"Status HTTP:{r.status_code} {r.reason} {r.text}")
             sys.exit(1)
-        logging.info(r.status_code)
+        logging.info(f"Status HTTP:{r.status_code}")
 
 
 if __name__ == "__main__":

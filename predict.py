@@ -77,6 +77,14 @@ def predict(args):
         logging.error("Invalid pickle - unable to unpickle!")
         logging.debug(e)
         sys.exit(1)
+    except TypeError as e:
+        logging.error("Invalid pickle - are you using the right python version?")
+        logging.debug(e)
+        sys.exit(1)
+    except ModuleNotFoundError as e:
+        logging.error("Invalid pickle - are you importing missing dependencies?")
+        logging.debug(e)
+        sys.exit(1)
     logging.debug(model)
 
     if os.path.exists(args.dataset):
@@ -99,6 +107,11 @@ def predict(args):
         predictions = model(live_features)
         if predictions is None:
             logging.error("Pickle function is invalid - returned None")
+            sys.exit(1)
+        elif type(predictions) != pd.DataFrame:
+            logging.error(
+                f"Pickle function is invalid - returned {type(predictions)} instead of pd.DataFrame"
+            )
             sys.exit(1)
         elif len(predictions) == 0:
             logging.error("Pickle function returned 0 predictions")

@@ -54,7 +54,7 @@ def parse_args():
     return args
 
 
-def predict(args):
+def main(args):
     if args.model.lower().startswith("http"):
         truncated_url = args.model.split("?")[0]
         logging.info(f"Downloading model {truncated_url}")
@@ -63,7 +63,8 @@ def predict(args):
             logging.error(f"{response.reason} {response.text}")
             sys.exit(1)
 
-        model_pkl = os.path.join(args.output_dir, f"model-{secrets.token_hex(6)}.pkl")
+        model_name = truncated_url.split("/")[-1]
+        model_pkl = os.path.join(args.output_dir, model_name)
         logging.info(f"Saving model to {model_pkl}")
         with open(model_pkl, "wb") as f:
             shutil.copyfileobj(response.raw, f)
@@ -119,6 +120,12 @@ def predict(args):
     except TypeError as e:
         logging.error(f"Pickle function is invalid - {e}")
         sys.exit(1)
+    except Exception as e:
+        if args.debug:
+            logging.exception(e)
+        else:
+            logging.error(e)
+        sys.exit(1)
 
     logging.info(f"Generated {len(predictions)} predictions")
     logging.debug(predictions)
@@ -141,4 +148,4 @@ def predict(args):
 
 
 if __name__ == "__main__":
-    predict(parse_args())
+    main(parse_args())

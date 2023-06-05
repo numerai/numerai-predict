@@ -37,32 +37,56 @@ test_3_10: build_3_10 ## Test Python 3.10 pickle
 test_3_11: build_3_11 ## Test Python 3.11 pickle
 	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_11:latest --model ${PWD}/tests/models/model_3_11.pkl
 
-.PHONY: release
-release: release_3_9 release_3_10 release_3_11 ## Push all container tagged releases
+.PHONY: push_latest
+push_latest: push_latest_3_9 push_latest_3_10 push_latest_3_11 ## Push latest docker containers
 
-.PHONY: release_3_9
-release_3_9: ## Release Python 3.9 contianer tagged release
-	docker build -t ${NAME}_py_3_9:${GIT_REF} -t ${NAME}_py_3_9:latest -f py3.9/Dockerfile .
+.PHONY: push_latest_3_9
+push_3_9: build_3_9 ## Push Python 3.9 contianer tagged latest
 	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
 	docker tag ${NAME}_py_3_9:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
 	docker tag ${NAME}_py_3_9:latest ${ECR_REPO}/${NAME}_py_3_9:latest
 	docker push ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
 	docker push ${ECR_REPO}/${NAME}_py_3_9:latest
 
-.PHONY: release_3_10
-release_3_10: ## Release Python 3.10 contianer tagged release
-	docker build -t ${NAME}_py_3_10:${GIT_REF} -t ${NAME}_py_3_10:latest -f py3.10/Dockerfile .
+.PHONY: push_latest_3_10
+push_latest_3_10: build_3_10 ## Release Python 3.10 contianer tagged latest
 	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
 	docker tag ${NAME}_py_3_10:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_10:${GIT_REF}
 	docker tag ${NAME}_py_3_10:latest ${ECR_REPO}/${NAME}_py_3_10:latest
 	docker push ${ECR_REPO}/${NAME}_py_3_10:${GIT_REF}
 	docker push ${ECR_REPO}/${NAME}_py_3_10:latest
 
-.PHONY: release_3_11
-release_3_11: ## Release Python 3.11 contianer tagged release
-	docker build -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
+.PHONY: push_latest_3_11
+push_latest_3_11: build_3_11## Release Python 3.11 contianer tagged latest
 	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
 	docker tag ${NAME}_py_3_11:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}
 	docker tag ${NAME}_py_3_11:latest ${ECR_REPO}/${NAME}_py_3_11:latest
 	docker push ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}
 	docker push ${ECR_REPO}/${NAME}_py_3_11:latest
+
+.PHONY: push_stable
+push_stable: push_stable_3_9 push_stable_3_10 push_stable_3_11 ## Push all container tagged stable
+
+.PHONY: push_stable_3_9
+push_stable_3_9: build_3_9 ## Release Python 3.9 contianer tagged stable
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	docker tag ${NAME}_py_3_9:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
+	docker tag ${NAME}_py_3_9:latest ${ECR_REPO}/${NAME}_py_3_9:stable
+	docker push ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_py_3_9:stable
+
+.PHONY: push_stable_3_10
+push_stable_3_10: build_3_10 ## Release Python 3.10 contianer tagged stable
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	docker tag ${NAME}_py_3_10:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_10:${GIT_REF}
+	docker tag ${NAME}_py_3_10:latest ${ECR_REPO}/${NAME}_py_3_10:stable
+	docker push ${ECR_REPO}/${NAME}_py_3_10:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_py_3_10:stable
+
+.PHONY: push_stable_3_11
+push_stable_3_11: build_3_11## Release Python 3.11 contianer tagged stable
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	docker tag ${NAME}_py_3_11:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}
+	docker tag ${NAME}_py_3_11:latest ${ECR_REPO}/${NAME}_py_3_11:stable
+	docker push ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_py_3_11:stable

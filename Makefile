@@ -45,7 +45,7 @@ test_3_11: build_3_11 ## Test Python 3.11 pickle
 push_latest: push_latest_3_9 push_latest_3_10 push_latest_3_11 ## Push latest docker containers
 
 .PHONY: push_latest_3_9
-push_3_9: build_3_9 ## Push Python 3.9 contianer tagged latest
+push_latest_3_9: build_3_9 ## Push Python 3.9 contianer tagged latest
 	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
 	docker tag ${NAME}_py_3_9:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_9:${GIT_REF}
 	docker tag ${NAME}_py_3_9:latest ${ECR_REPO}/${NAME}_py_3_9:latest

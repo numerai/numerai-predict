@@ -75,16 +75,18 @@ def main(args):
     try:
         model = pd.read_pickle(model_pkl)
     except pickle.UnpicklingError as e:
-        logging.error("Invalid pickle - unable to unpickle!")
-        logging.debug(e)
+        logging.error(f"Invalid pickle - {e}")
+        if args.debug:
+            logging.exception(e)
         sys.exit(1)
     except TypeError as e:
-        logging.error("Invalid pickle - are you using the right python version?")
-        logging.debug(e)
+        logging.error(f"Pickle incompatible with Python{'.'.join(sys.version.split('.')[0:2])}")
+        logging.exception(e) if args.debug else logging.error(e)
         sys.exit(1)
     except ModuleNotFoundError as e:
-        logging.error("Invalid pickle - are you importing missing dependencies?")
-        logging.debug(e)
+        logging.error(f"Import error reading pickle - {e}")
+        if args.debug:
+            logging.exception(e)
         sys.exit(1)
     logging.debug(model)
 

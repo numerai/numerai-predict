@@ -3,7 +3,7 @@
 ## Local testing of pickle models
 You can run a local pickle model via
 ```
-docker run -i --rm -v "$PWD:$PWD" numerai_predict_py_3_9:latest --model $PWD/model.pkl --dataset v4.1/live.parquet --debug
+docker run -i --rm -v "$PWD:$PWD" ghcr.io/numerai/numerai_predict_py_3_10:stable --model $PWD/model.pkl
 ```
 
 ## Presigned S3 URLs

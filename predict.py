@@ -49,12 +49,12 @@ def parse_args():
             )
         args.post_data = data
 
-    logging.getLogger().setLevel(logging.DEBUG if args.debug else logging.INFO)
-
     return args
 
-
 def main(args):
+    logging.getLogger().setLevel(logging.DEBUG if args.debug else logging.INFO)
+    logging.info(f"Python {sys.version}")
+
     if args.model.lower().startswith("http"):
         truncated_url = args.model.split("?")[0]
         logging.info(f"Downloading model {truncated_url}")

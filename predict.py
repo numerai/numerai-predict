@@ -60,8 +60,7 @@ def exit_with_help(error):
     logging.root.handlers[0].setFormatter(logging.Formatter("%(message)s"))
 
     logging.info("-"*80)
-    logging.info("Having problems?")
-    logging.info("\nDebug your pickle model locally via docker command:")
+    logging.info("Debug your pickle model locally via docker command:")
     logging.info(f'\n docker run -i --rm -v "$PWD:$PWD" {docker_image_path} {docker_args}')
     logging.info("\nTry our other support resources:")
     logging.info(" [Github]  https://github.com/numerai/numerai-predict")

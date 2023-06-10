@@ -51,6 +51,25 @@ def parse_args():
 
     return args
 
+def exit_with_help(error):
+    py_version = "_".join(sys.version.split('.')[:2])
+    docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version}:latest"
+    docker_args = "--debug --model $PWD/[PICKLE_FILE]"
+
+    logging.root.handlers[0].flush()
+    logging.root.handlers[0].setFormatter(logging.Formatter("%(message)s"))
+
+    logging.info("-"*80)
+    logging.info("Having problems?")
+    logging.info("\nDebug your pickle model locally via docker command:")
+    logging.info(f'\n docker run -i --rm -v "$PWD:$PWD" {docker_image_path} {docker_args}')
+    logging.info("\nTry our other support resources:")
+    logging.info(" [Github]  https://github.com/numerai/numerai-predict")
+    logging.info(" [Discord] https://discord.com/channels/894652647515226152/1089652477957246996")
+    logging.info("-"*80)
+
+    sys.exit(error)
+
 def main(args):
     logging.getLogger().setLevel(logging.DEBUG if args.debug else logging.INFO)
     logging.info(f"Python {sys.version}")
@@ -78,16 +97,16 @@ def main(args):
         logging.error(f"Invalid pickle - {e}")
         if args.debug:
             logging.exception(e)
-        sys.exit(1)
+        exit_with_help(1)
     except TypeError as e:
         logging.error(f"Pickle incompatible with Python{'.'.join(sys.version.split('.')[0:2])}")
         logging.exception(e) if args.debug else logging.error(e)
-        sys.exit(1)
+        exit_with_help(1)
     except ModuleNotFoundError as e:
         logging.error(f"Import error reading pickle - {e}")
         if args.debug:
             logging.exception(e)
-        sys.exit(1)
+        exit_with_help(1)
     logging.debug(model)
 
     if os.path.exists(args.dataset):
@@ -95,7 +114,7 @@ def main(args):
         logging.info(f"Using local {dataset_path} for live data")
     elif args.dataset.startswith("/"):
         logging.error(f"Local dataset not found - {args.dataset} does not exist!")
-        sys.exit(1)
+        exit_with_help(1)
     else:
         dataset_path = os.path.join(args.output_dir, args.dataset)
         logging.info(f"Using NumerAPI to download {args.dataset} for live data")
@@ -105,29 +124,28 @@ def main(args):
     logging.info(f"Loading live features {dataset_path}")
     live_features = pd.read_parquet(dataset_path)
 
-    logging.info(f"Predicting on {len(live_features)} live features")
+    logging.info(f"Predicting on {len(live_features)} rows of live features")
     try:
         predictions = model(live_features)
         if predictions is None:
             logging.error("Pickle function is invalid - returned None")
-            sys.exit(1)
+            exit_with_help(1)
         elif type(predictions) != pd.DataFrame:
             logging.error(
                 f"Pickle function is invalid - returned {type(predictions)} instead of pd.DataFrame"
             )
-            sys.exit(1)
+            exit_with_help(1)
         elif len(predictions) == 0:
             logging.error("Pickle function returned 0 predictions")
-            sys.exit(1)
+            exit_with_help(1)
     except TypeError as e:
         logging.error(f"Pickle function is invalid - {e}")
-        sys.exit(1)
-    except Exception as e:
         if args.debug:
             logging.exception(e)
-        else:
-            logging.error(e)
-        sys.exit(1)
+        exit_with_help(1)
+    except Exception as e:
+        logging.exception(e)
+        exit_with_help(1)
 
     logging.info(f"Generated {len(predictions)} predictions")
     logging.debug(predictions)

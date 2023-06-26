@@ -61,6 +61,7 @@ def exit_with_help(error):
 
     logging.root.handlers[0].flush()
     logging.root.handlers[0].setFormatter(logging.Formatter("%(message)s"))
+
     logging.info(
         f"""
 {"-" * 80}

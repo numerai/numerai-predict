@@ -55,13 +55,12 @@ def parse_args():
 
 
 def exit_with_help(error):
-
-    logging.root.handlers[0].flush()
-    logging.root.handlers[0].setFormatter(logging.Formatter("%(message)s"))
-
     py_version = "_".join(sys.version.split('.')[:2])
     docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version}:latest"
     docker_args = "--debug --model $PWD/[PICKLE_FILE]"
+
+    logging.root.handlers[0].flush()
+    logging.root.handlers[0].setFormatter(logging.Formatter("%(message)s"))
     logging.info(
         f"""
 {"-" * 80}

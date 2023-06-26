@@ -7,6 +7,8 @@ import secrets
 import shutil
 import sys
 import urllib
+import time
+import random
 
 from numerapi import NumerAPI
 import pandas as pd
@@ -51,27 +53,39 @@ def parse_args():
 
     return args
 
+
+def py_version(separator='.'):
+    return separator.join(sys.version.split('.')[:2])
+
+
 def exit_with_help(error):
-    py_version = "_".join(sys.version.split('.')[:2])
-    docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version}:latest"
+    docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version('_')}:latest"
     docker_args = "--debug --model $PWD/[PICKLE_FILE]"
 
     logging.root.handlers[0].flush()
     logging.root.handlers[0].setFormatter(logging.Formatter("%(message)s"))
 
-    logging.info("-"*80)
-    logging.info("Debug your pickle model locally via docker command:")
-    logging.info(f'\n docker run -i --rm -v "$PWD:$PWD" {docker_image_path} {docker_args}')
-    logging.info("\nTry our other support resources:")
-    logging.info(" [Github]  https://github.com/numerai/numerai-predict")
-    logging.info(" [Discord] https://discord.com/channels/894652647515226152/1089652477957246996")
-    logging.info("-"*80)
+    logging.info(
+        f"""
+{"-" * 80}
+Debug your pickle model locally via docker command:
+
+    docker run -i --rm -v "$PWD:$PWD" {docker_image_path} {docker_args}
+
+Try our other support resources:
+    [Github]  https://github.com/numerai/numerai-predict
+    [Discord] https://discord.com/channels/894652647515226152/1089652477957246996
+{"-" * 80}"""
+    )
 
     sys.exit(error)
 
+
 def main(args):
     logging.getLogger().setLevel(logging.DEBUG if args.debug else logging.INFO)
-    logging.info(f"Python {sys.version}")
+
+    python_version = f"Python{py_version()}"
+    logging.info(python_version)
 
     if args.model.lower().startswith("http"):
         truncated_url = args.model.split("?")[0]
@@ -98,7 +112,7 @@ def main(args):
             logging.exception(e)
         exit_with_help(1)
     except TypeError as e:
-        logging.error(f"Pickle incompatible with Python{'.'.join(sys.version.split('.')[0:2])}")
+        logging.error(f"Pickle incompatible with {python_version}")
         logging.exception(e) if args.debug else logging.error(e)
         exit_with_help(1)
     except ModuleNotFoundError as e:
@@ -159,11 +173,23 @@ def main(args):
     if args.post_url:
         logging.info(f"Uploading predictions to {args.post_url}")
         files = {"file": open(predictions_csv, "rb")}
-        r = requests.post(args.post_url, data=args.post_data, files=files)
-        if r.status_code not in [200, 204]:
-            logging.error(f"Status HTTP:{r.status_code} {r.reason} {r.text}")
-            sys.exit(1)
-        logging.info(f"Status HTTP:{r.status_code}")
+
+        MAX_RETRIES = 5
+        RETRY_DELAY = 1.5
+        RETRY_EXP = 1.5
+        for i in range(MAX_RETRIES):
+            r = requests.post(args.post_url, data=args.post_data, files=files)
+            logging.info(f"HTTP Response Status: {r.status_code}")
+            if r.status_code == 503:
+                logging.info(f"Slowing down. Retrying in {RETRY_DELAY}s...")
+                time.sleep(RETRY_DELAY)
+                RETRY_DELAY **= random.uniform(1, RETRY_EXP)
+            elif r.status_code not in [200, 204]:
+                logging.error(r.reason)
+                logging.error(r.text)
+                sys.exit(1)
+            else:
+                sys.exit(0)
 
 
 if __name__ == "__main__":

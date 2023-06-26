@@ -54,9 +54,12 @@ def parse_args():
     return args
 
 
+def py_version(separator='.'):
+    return separator.join(sys.version.split('.')[:2])
+
+
 def exit_with_help(error):
-    py_version = "_".join(sys.version.split('.')[:2])
-    docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version}:latest"
+    docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version('_')}:latest"
     docker_args = "--debug --model $PWD/[PICKLE_FILE]"
 
     logging.root.handlers[0].flush()
@@ -80,7 +83,9 @@ Try our other support resources:
 
 def main(args):
     logging.getLogger().setLevel(logging.DEBUG if args.debug else logging.INFO)
-    logging.info(f"Python {sys.version}")
+
+    python_version = f"Python{py_version()}"
+    logging.info(python_version)
 
     if args.model.lower().startswith("http"):
         truncated_url = args.model.split("?")[0]
@@ -107,9 +112,7 @@ def main(args):
             logging.exception(e)
         exit_with_help(1)
     except TypeError as e:
-        logging.error(
-            f"Pickle incompatible with Python{'.'.join(sys.version.split('.')[0:2])}"
-        )
+        logging.error(f"Pickle incompatible with {python_version}")
         logging.exception(e) if args.debug else logging.error(e)
         exit_with_help(1)
     except ModuleNotFoundError as e:

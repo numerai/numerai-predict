@@ -7,6 +7,8 @@ import secrets
 import shutil
 import sys
 import urllib
+import time
+import random
 
 from numerapi import NumerAPI
 import pandas as pd
@@ -159,11 +161,22 @@ def main(args):
     if args.post_url:
         logging.info(f"Uploading predictions to {args.post_url}")
         files = {"file": open(predictions_csv, "rb")}
-        r = requests.post(args.post_url, data=args.post_data, files=files)
-        if r.status_code not in [200, 204]:
-            logging.error(f"Status HTTP:{r.status_code} {r.reason} {r.text}")
-            sys.exit(1)
-        logging.info(f"Status HTTP:{r.status_code}")
+
+        MAX_RETRIES = 5
+        RETRY_DELAY = 1.5
+        RETRY_EXP = 1.5
+        for i in range(MAX_RETRIES):
+            r = requests.post(args.post_url, data=args.post_data, files=files)
+            logging.info(f"HTTP Response Status: {r.status_code}")
+            if r.status_code == 503:
+                logging.info(f"Slowing down. Retrying in {RETRY_DELAY}s...")
+                time.sleep(RETRY_DELAY)
+                RETRY_DELAY **= random.uniform(1, RETRY_EXP)
+            elif r.status_code not in [200, 204]:
+                logging.error(r.text)
+                sys.exit(1)
+            else:
+                sys.exit(0)
 
 
 if __name__ == "__main__":

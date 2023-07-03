@@ -165,8 +165,11 @@ def main(args):
                     f"Pickle function is invalid - returned {type(predictions)} instead of pd.DataFrame"
                 )
                 exit_with_help(1)
-            elif len(predictions) == 0:
-                logging.error("Pickle function returned 0 predictions")
+            elif len(predictions) == 0 or len(predictions[~predictions.isna()]) == 0:
+                logging.error("Pickle function returned 0 valid predictions")
+                exit_with_help(1)
+            elif predictions.std() == 0:
+                logging.error("Pickle function returned constant predictions")
                 exit_with_help(1)
         except TypeError as e:
             logging.error(f"Pickle function is invalid - {e}")

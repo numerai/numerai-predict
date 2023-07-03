@@ -9,6 +9,7 @@ import sys
 import urllib
 import time
 import random
+import glob
 
 from numerapi import NumerAPI
 import pandas as pd
@@ -16,10 +17,15 @@ import pandas as pd
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         "--dataset",
         default="v4.1/live.parquet",
-        help="Numerapi dataset path or local file",
+        help="Numerapi dataset path or local file.",
+    )
+    group.add_argument(
+        "--dataset-glob",
+        help="Glob pattern to match multiple datasets.",
     )
     parser.add_argument("--model", required=True, help="Pickled model file or URL")
     parser.add_argument("--output_dir", default="/tmp", help="File output dir")
@@ -122,53 +128,66 @@ def main(args):
         exit_with_help(1)
     logging.debug(model)
 
-    if os.path.exists(args.dataset):
-        dataset_path = args.dataset
-        logging.info(f"Using local {dataset_path} for live data")
-    elif args.dataset.startswith("/"):
-        logging.error(f"Local dataset not found - {args.dataset} does not exist!")
-        exit_with_help(1)
+    datasets = []
+    if args.dataset_glob:
+        datasets = glob.glob(args.dataset_glob)
+        if len(datasets) == 0:
+            logging.error(f"No datasets found matching \"{args.dataset_glob}\"")
+            exit_with_help(1)
     else:
-        dataset_path = os.path.join(args.output_dir, args.dataset)
-        logging.info(f"Using NumerAPI to download {args.dataset} for live data")
-        napi = NumerAPI()
-        napi.download_dataset(args.dataset, dataset_path)
+        datasets = [args.dataset]
 
-    logging.info(f"Loading live features {dataset_path}")
-    live_features = pd.read_parquet(dataset_path)
+    all_predictions = []
+    for dataset in datasets:
+        if os.path.exists(dataset):
+            dataset_path = dataset
+            logging.info(f"Using local {dataset_path} for live data")
+        elif dataset.startswith("/"):
+            logging.error(f"Local dataset not found - {dataset} does not exist!")
+            exit_with_help(1)
+        else:
+            dataset_path = os.path.join(args.output_dir, dataset)
+            logging.info(f"Using NumerAPI to download {dataset} for live data")
+            napi = NumerAPI()
+            napi.download_dataset(dataset, dataset_path)
 
-    logging.info(f"Predicting on {len(live_features)} rows of live features")
-    try:
-        predictions = model(live_features)
-        if predictions is None:
-            logging.error("Pickle function is invalid - returned None")
+        logging.info(f"Loading live features {dataset_path}")
+        live_features = pd.read_parquet(dataset_path)
+
+        logging.info(f"Predicting on {len(live_features)} rows of live features")
+        try:
+            predictions = model(live_features)
+            if predictions is None:
+                logging.error("Pickle function is invalid - returned None")
+                exit_with_help(1)
+            elif type(predictions) != pd.DataFrame:
+                logging.error(
+                    f"Pickle function is invalid - returned {type(predictions)} instead of pd.DataFrame"
+                )
+                exit_with_help(1)
+            elif len(predictions) == 0 or len(predictions[~predictions.isna()]) == 0:
+                logging.error("Pickle function returned 0 valid predictions")
+                exit_with_help(1)
+        except TypeError as e:
+            logging.error(f"Pickle function is invalid - {e}")
+            if args.debug:
+                logging.exception(e)
             exit_with_help(1)
-        elif type(predictions) != pd.DataFrame:
-            logging.error(
-                f"Pickle function is invalid - returned {type(predictions)} instead of pd.DataFrame"
-            )
-            exit_with_help(1)
-        elif len(predictions) == 0:
-            logging.error("Pickle function returned 0 predictions")
-            exit_with_help(1)
-    except TypeError as e:
-        logging.error(f"Pickle function is invalid - {e}")
-        if args.debug:
+        except Exception as e:
             logging.exception(e)
-        exit_with_help(1)
-    except Exception as e:
-        logging.exception(e)
-        exit_with_help(1)
+            exit_with_help(1)
 
-    logging.info(f"Generated {len(predictions)} predictions")
-    logging.debug(predictions)
+        logging.info(f"Generated {len(predictions)} predictions")
+        logging.debug(predictions)
+        all_predictions.append(predictions)
 
+    all_predictions = pd.concat(all_predictions)
     predictions_csv = os.path.join(
         args.output_dir, f"live_predictions-{secrets.token_hex(6)}.csv"
     )
     logging.info(f"Saving predictions to {predictions_csv}")
     with open(predictions_csv, "w") as f:
-        predictions.to_csv(f)
+        all_predictions.to_csv(f)
 
     if args.post_url:
         logging.info(f"Uploading predictions to {args.post_url}")

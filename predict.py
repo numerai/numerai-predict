@@ -17,7 +17,7 @@ import pandas as pd
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group(required=True)
+    group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--dataset",
         default="v4.1/live.parquet",

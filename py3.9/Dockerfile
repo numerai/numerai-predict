@@ -1,5 +1,7 @@
 FROM python:3.9-slim
 
+ARG GIT_REF
+ENV GIT_REF=$GIT_REF
 RUN apt-get update -yqq \
     && apt-get install -yqq --no-install-recommends \
         build-essential \

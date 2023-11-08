@@ -171,7 +171,7 @@ def main(args):
             elif predictions.isna().any().any():
                 logging.error("Pickle function returned at least 1 NaN prediction")
                 exit_with_help(1)
-            elif not (predictions.between(0, 1).all().all()):
+            elif not (predictions.iloc[:, 0].between(0, 1).all().all()):
                 logging.error(
                     "Pickle function returned invalid predictions. Ensure values are between 0 and 1."
                 )

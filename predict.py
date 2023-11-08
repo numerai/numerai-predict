@@ -20,7 +20,7 @@ def parse_args():
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--dataset",
-        default="v4.1/live.parquet",
+        default="v4.2/live_int8.parquet",
         help="Numerapi dataset path or local file.",
     )
     group.add_argument(
@@ -65,7 +65,8 @@ def py_version(separator='.'):
 
 
 def exit_with_help(error):
-    docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version('_')}:latest"
+    git_ref = os.getenv('GIT_REF', 'latest')
+    docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version('_')}:{git_ref}"
     docker_args = "--debug --model $PWD/[PICKLE_FILE]"
 
     logging.root.handlers[0].flush()
@@ -90,8 +91,7 @@ Try our other support resources:
 def main(args):
     logging.getLogger().setLevel(logging.DEBUG if args.debug else logging.INFO)
 
-    python_version = f"Python{py_version()}"
-    logging.info(python_version)
+    logging.info(f"Running numerai-predict:{os.getenv('GIT_REF')} Python{py_version()}")
 
     if args.model.lower().startswith("http"):
         truncated_url = args.model.split("?")[0]

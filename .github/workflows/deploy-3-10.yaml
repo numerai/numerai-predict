@@ -19,6 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Extract short git SHA
+        run: echo "GIT_REF=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+
       - name: Log in to Github Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
@@ -47,7 +50,7 @@ jobs:
           context: .
           file: ./py3.10/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}_py_3_10:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}_py_3_10:${{ env.GIT_REF }}
           labels: ${{ steps.meta.outputs.labels }}
 
   internal-py310-image:

@@ -10,6 +10,7 @@ import urllib
 import time
 import random
 import glob
+from inspect import signature
 
 from numerapi import NumerAPI
 import pandas as pd
@@ -17,15 +18,16 @@ import pandas as pd
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group(required=True)
+    group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--dataset",
-        default="v4.1/live.parquet",
+        default="v4.3/live_int8.parquet",
         help="Numerapi dataset path or local file.",
     )
     group.add_argument(
-        "--dataset-glob",
-        help="Glob pattern to match multiple datasets.",
+        "--benchmarks",
+        default="v4.3/live_benchmark_models.parquet",
+        help="Numerapi benchmark model path or local file.",
     )
     parser.add_argument("--model", required=True, help="Pickled model file or URL")
     parser.add_argument("--output_dir", default="/tmp", help="File output dir")
@@ -60,12 +62,15 @@ def parse_args():
     return args
 
 
-def py_version(separator='.'):
-    return separator.join(sys.version.split('.')[:2])
+def py_version(separator="."):
+    return separator.join(sys.version.split(".")[:2])
 
 
 def exit_with_help(error):
-    docker_image_path = f"ghcr.io/numerai/numerai_predict_py_{py_version('_')}:latest"
+    git_ref = os.getenv("GIT_REF", "latest")
+    docker_image_path = (
+        f"ghcr.io/numerai/numerai_predict_py_{py_version('_')}:{git_ref}"
+    )
     docker_args = "--debug --model $PWD/[PICKLE_FILE]"
 
     logging.root.handlers[0].flush()
@@ -87,20 +92,56 @@ Try our other support resources:
     sys.exit(error)
 
 
+@staticmethod
+def retry_request_with_backoff(
+    url: str,
+    retries: int = 10,
+    delay_base: float = 1.5,
+    delay_exp: float = 1.5,
+    retry_on_status_codes: list[int] = [503],
+):
+    delay_base = max(1.1, delay_base)
+    delay_exp = max(1.1, delay_exp)
+    curr_delay = delay_base
+    for i in range(retries):
+        response = requests.get(url, stream=True, allow_redirects=True)
+        if response.status_code in retry_on_status_codes:
+            time.sleep(curr_delay)
+            curr_delay **= random.uniform(1, delay_exp)
+        elif response.status_code != 200:
+            logging.error(f"{response.reason} {response.text}")
+            sys.exit(1)
+        else:
+            return response
+    raise RuntimeError(f"Could not complete function call after {retries} retries...")
+
+
+def get_data(dataset, output_dir):
+    if os.path.exists(dataset):
+        dataset_path = dataset
+        logging.info(f"Using local {dataset_path} for live data")
+    elif dataset.startswith("/"):
+        logging.error(f"Local dataset not found - {dataset} does not exist!")
+        exit_with_help(1)
+    else:
+        dataset_path = os.path.join(output_dir, dataset)
+        logging.info(f"Using NumerAPI to download {dataset} for live data")
+        napi = NumerAPI()
+        napi.download_dataset(dataset, dataset_path)
+    logging.info(f"Loading live features {dataset_path}")
+    live_features = pd.read_parquet(dataset_path)
+    return live_features
+
+
 def main(args):
     logging.getLogger().setLevel(logging.DEBUG if args.debug else logging.INFO)
 
-    python_version = f"Python{py_version()}"
-    logging.info(python_version)
+    logging.info(f"Running numerai-predict:{os.getenv('GIT_REF')} Python{py_version()}")
 
     if args.model.lower().startswith("http"):
         truncated_url = args.model.split("?")[0]
         logging.info(f"Downloading model {truncated_url}")
-        response = requests.get(args.model, stream=True, allow_redirects=True)
-        if response.status_code != 200:
-            logging.error(f"{response.reason} {response.text}")
-            sys.exit(1)
-
+        response = retry_request_with_backoff(args.model)
         model_name = truncated_url.split("/")[-1]
         model_pkl = os.path.join(args.output_dir, model_name)
         logging.info(f"Saving model to {model_pkl}")
@@ -128,66 +169,61 @@ def main(args):
         exit_with_help(1)
     logging.debug(model)
 
-    datasets = []
-    if args.dataset_glob:
-        datasets = glob.glob(args.dataset_glob)
-        if len(datasets) == 0:
-            logging.error(f"No datasets found matching \"{args.dataset_glob}\"")
-            exit_with_help(1)
-    else:
-        datasets = [args.dataset]
+    num_args = len(signature(model).parameters)
 
-    all_predictions = []
-    for dataset in datasets:
-        if os.path.exists(dataset):
-            dataset_path = dataset
-            logging.info(f"Using local {dataset_path} for live data")
-        elif dataset.startswith("/"):
-            logging.error(f"Local dataset not found - {dataset} does not exist!")
-            exit_with_help(1)
-        else:
-            dataset_path = os.path.join(args.output_dir, dataset)
-            logging.info(f"Using NumerAPI to download {dataset} for live data")
-            napi = NumerAPI()
-            napi.download_dataset(dataset, dataset_path)
+    live_features = get_data(args.dataset, args.output_dir)
+    if num_args > 1:
+        benchmark_models = get_data(args.benchmarks, args.output_dir)
 
-        logging.info(f"Loading live features {dataset_path}")
-        live_features = pd.read_parquet(dataset_path)
-
-        logging.info(f"Predicting on {len(live_features)} rows of live features")
-        try:
+    logging.info(f"Predicting on {len(live_features)} rows of live features")
+    try:
+        if num_args == 1:
             predictions = model(live_features)
-            if predictions is None:
-                logging.error("Pickle function is invalid - returned None")
-                exit_with_help(1)
-            elif type(predictions) != pd.DataFrame:
-                logging.error(
-                    f"Pickle function is invalid - returned {type(predictions)} instead of pd.DataFrame"
-                )
-                exit_with_help(1)
-            elif len(predictions) == 0 or len(predictions[~predictions.isna()]) == 0:
-                logging.error("Pickle function returned 0 valid predictions")
-                exit_with_help(1)
-        except TypeError as e:
-            logging.error(f"Pickle function is invalid - {e}")
-            if args.debug:
-                logging.exception(e)
+        elif num_args == 2:
+            predictions = model(live_features, benchmark_models)
+        else:
+            logging.error(
+                f"Invalid pickle function - {model_pkl} must have 1 or 2 arguments"
+            )
             exit_with_help(1)
-        except Exception as e:
+
+        if predictions is None:
+            logging.error("Pickle function is invalid - returned None")
+            exit_with_help(1)
+        elif type(predictions) != pd.DataFrame:
+            logging.error(
+                f"Pickle function is invalid - returned {type(predictions)} instead of pd.DataFrame"
+            )
+            exit_with_help(1)
+        elif len(predictions) == 0:
+            logging.error("Pickle function returned 0 predictions")
+            exit_with_help(1)
+        elif predictions.isna().any().any():
+            logging.error("Pickle function returned at least 1 NaN prediction")
+            exit_with_help(1)
+        elif not (predictions.iloc[:, 0].between(0, 1).all().all()):
+            logging.error(
+                "Pickle function returned invalid predictions. Ensure values are between 0 and 1."
+            )
+            exit_with_help(1)
+    except TypeError as e:
+        logging.error(f"Pickle function is invalid - {e}")
+        if args.debug:
             logging.exception(e)
-            exit_with_help(1)
+        exit_with_help(1)
+    except Exception as e:
+        logging.exception(e)
+        exit_with_help(1)
 
-        logging.info(f"Generated {len(predictions)} predictions")
-        logging.debug(predictions)
-        all_predictions.append(predictions)
+    logging.info(f"Generated {len(predictions)} predictions")
+    logging.debug(predictions)
 
-    all_predictions = pd.concat(all_predictions)
     predictions_csv = os.path.join(
         args.output_dir, f"live_predictions-{secrets.token_hex(6)}.csv"
     )
     logging.info(f"Saving predictions to {predictions_csv}")
     with open(predictions_csv, "w") as f:
-        all_predictions.to_csv(f)
+        predictions.to_csv(f)
 
     if args.post_url:
         logging.info(f"Uploading predictions to {args.post_url}")

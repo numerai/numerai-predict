@@ -16,29 +16,32 @@ build:	build_3_9 build_3_10 build_3_11 ## Build all Python containers
 
 .PHONY: build_3_9
 build_3_9: ## Build Python 3.9 container
-	docker build -t ${NAME}_py_3_9:${GIT_REF} -t ${NAME}_py_3_9:latest -f py3.9/Dockerfile .
+	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_9:${GIT_REF} -t ${NAME}_py_3_9:latest -f py3.9/Dockerfile .
 
 .PHONY: build_3_10
 build_3_10: ## Build Python 3.10 container
-	docker build -t ${NAME}_py_3_10:${GIT_REF} -t ${NAME}_py_3_10:latest -f py3.10/Dockerfile .
+	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_10:${GIT_REF} -t ${NAME}_py_3_10:latest -f py3.10/Dockerfile .
 
 .PHONY: build_3_11
 build_3_11: ## Build Python 3.11 container
-	docker build -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
+	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
 
 .PHONY: test
 test: test_3_9 test_3_10 test_3_11 ## Test all container versions
 
 .PHONY: test_3_9
 test_3_9: build_3_9 ## Test Python 3.9 pickle
+	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_9:latest --model ${PWD}/tests/models/model_3_9_legacy.pkl
 	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_9:latest --model ${PWD}/tests/models/model_3_9.pkl
 
 .PHONY: test_3_10
 test_3_10: build_3_10 ## Test Python 3.10 pickle
+	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_10:latest --model ${PWD}/tests/models/model_3_10_legacy.pkl
 	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_10:latest --model ${PWD}/tests/models/model_3_10.pkl
 
 .PHONY: test_3_11
 test_3_11: build_3_11 ## Test Python 3.11 pickle
+	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_11:latest --model ${PWD}/tests/models/model_3_11_legacy.pkl
 	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_11:latest --model ${PWD}/tests/models/model_3_11.pkl
 
 .PHONY: push_latest

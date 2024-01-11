@@ -38,6 +38,7 @@ Markdown==3.4.3
 MarkupSafe==2.1.3
 matplotlib==3.7.1
 ml-dtypes==0.2.0
+mlxtend==0.23.1
 mpmath==1.3.0
 multidict==6.0.4
 networkx==3.1
@@ -66,6 +67,7 @@ rsa==4.9
 scikit-learn==1.2.2
 scipy==1.10.1
 six==1.16.0
+statsmodels==0.14.1
 sympy==1.12
 tenacity==8.2.2
 tensorboard==2.14.1

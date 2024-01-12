@@ -2,7 +2,7 @@ name: Test all versions
 
 on:
   workflow_dispatch:
-  push
+  push:
 
 jobs:
   test-py-3-9:

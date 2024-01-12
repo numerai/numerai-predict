@@ -92,7 +92,6 @@ Try our other support resources:
     sys.exit(error)
 
 
-@staticmethod
 def retry_request_with_backoff(
     url: str,
     retries: int = 10,
@@ -159,7 +158,7 @@ def main(args):
             logging.exception(e)
         exit_with_help(1)
     except TypeError as e:
-        logging.error(f"Pickle incompatible with {python_version}")
+        logging.error(f"Pickle incompatible with {py_version()}")
         logging.exception(e) if args.debug else logging.error(e)
         exit_with_help(1)
     except ModuleNotFoundError as e:

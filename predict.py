@@ -18,13 +18,12 @@ import pandas as pd
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
+    parser.add_argument(
         "--dataset",
         default="v4.3/live_int8.parquet",
         help="Numerapi dataset path or local file.",
     )
-    group.add_argument(
+    parser.add_argument(
         "--benchmarks",
         default="v4.3/live_benchmark_models.parquet",
         help="Numerapi benchmark model path or local file.",
@@ -98,6 +97,7 @@ def retry_request_with_backoff(
     delay_base: float = 1.5,
     delay_exp: float = 1.5,
     retry_on_status_codes: list[int] = [503],
+    debug: bool = False,
 ):
     delay_base = max(1.1, delay_base)
     delay_exp = max(1.1, delay_exp)
@@ -105,12 +105,15 @@ def retry_request_with_backoff(
     for i in range(retries):
         response = requests.get(url, stream=True, allow_redirects=True)
         if response.status_code in retry_on_status_codes:
+            if debug:
+                logging.debug(f"Recieved status {response.status_code}. Retrying...")
             time.sleep(curr_delay)
             curr_delay **= random.uniform(1, delay_exp)
         elif response.status_code != 200:
             logging.error(f"{response.reason} {response.text}")
             sys.exit(1)
         else:
+            logging.debug(f"Request successful! Returning...")
             return response
     raise RuntimeError(f"Could not complete function call after {retries} retries...")
 

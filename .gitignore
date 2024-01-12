@@ -6,7 +6,6 @@ venv/
 
 # Pickled models
 *.model
-*.pkl
 *.bin
 
 # Mac OSX

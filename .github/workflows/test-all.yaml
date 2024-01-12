@@ -1,0 +1,30 @@
+name: Test all versions
+
+on:
+  workflow_dispatch:
+  push
+
+jobs:
+  test-py-3-9:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test Python 3.9
+        run: make test_3_9
+
+  test-py-3-10:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test Python 3.10
+        run: make test_3_10
+
+  test-py-3-11:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test Python 3.11
+        run: make test_3_11

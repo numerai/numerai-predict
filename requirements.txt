@@ -29,7 +29,7 @@ idna==3.4
 jax==0.4.11
 Jinja2==3.1.2
 joblib==1.2.0
-keras==2.14.0
+keras==2.15.0
 kiwisolver==1.4.4
 libclang==16.0.0
 lightgbm==4.0.0
@@ -70,11 +70,11 @@ six==1.16.0
 statsmodels==0.14.1
 sympy==1.12
 tenacity==8.2.2
-tensorboard==2.14.1
+tensorboard==2.15.0
 tensorboard-data-server==0.7.2
-tensorflow==2.14.0
-tensorflow-decision-forests==1.4.0
-tensorflow-estimator==2.14.0
+tensorflow==2.15.0
+tensorflow-decision-forests==1.8.1
+tensorflow-estimator==2.15.0
 tensorflow-io-gcs-filesystem==0.34.0
 termcolor==2.3.0
 threadpoolctl==3.1.0

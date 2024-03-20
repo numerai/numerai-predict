@@ -82,6 +82,7 @@ torch==2.0.1
 torchmetrics==0.11.4
 tqdm==4.65.0
 treelite==3.9.1
+treelite-runtime==3.9.1
 typing_extensions==4.6.3
 tzdata==2023.3
 urllib3==1.26.15

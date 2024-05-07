@@ -103,7 +103,13 @@ def retry_request_with_backoff(
     delay_exp = max(1.1, delay_exp)
     curr_delay = delay_base
     for i in range(retries):
-        response = requests.get(url, stream=True, allow_redirects=True)
+        try:
+            response = requests.get(url, stream=True, allow_redirects=True)
+        except requests.exceptions.ConnectionError:
+            logging.error("Connection reset! Retrying...")
+            time.sleep(curr_delay)
+            curr_delay **= random.uniform(1, delay_exp)
+            continue
         if response.status_code in retry_on_status_codes:
             if debug:
                 logging.debug(f"Recieved status {response.status_code}. Retrying...")

@@ -68,6 +68,13 @@ jobs:
           aws-region: us-west-2
 
       - name: Build and Push Docker Image
-        id: build-push-docker-image
-        run: |
-          make push_latest_3_10
+        run: make push_latest_3_10
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
+          aws-region: us-west-2
+
+      - name: Build and Push Docker Image
+        run: make push_latest_3_10

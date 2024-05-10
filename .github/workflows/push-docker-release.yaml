@@ -57,8 +57,16 @@ jobs:
 
       - name: Build and Push Docker Image
         id: build-push-docker-image
-        run: |
-          make push_stable_3_9
+        run: make push_stable_3_9
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
+          aws-region: us-west-2
+
+      - name: Build and Push Docker Image
+        run: make push_latest_3_9
 
   public-py310-image:
     runs-on: ubuntu-latest
@@ -105,9 +113,16 @@ jobs:
           aws-region: us-west-2
 
       - name: Build and Push Docker Image
-        id: build-push-docker-image
-        run: |
-          make push_stable_3_10
+        run: make push_stable_3_10
+    
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
+          aws-region: us-west-2
+
+      - name: Build and Push Docker Image
+        run: make push_latest_3_10
 
   public-py311-image:
     runs-on: ubuntu-latest
@@ -154,6 +169,13 @@ jobs:
           aws-region: us-west-2
 
       - name: Build and Push Docker Image
-        id: build-push-docker-image
-        run: |
-          make push_stable_3_11
+        run: make push_stable_3_11
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
+          aws-region: us-west-2
+
+      - name: Build and Push Docker Image
+        run: make push_latest_3_11

@@ -1,5 +1,5 @@
 NAME		:= numerai_predict
-ECR_REPO	:= 584380190766.dkr.ecr.us-west-2.amazonaws.com
+ECR_REPO	:= ${ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com
 GIT_REF     	:= $$(git rev-parse --short HEAD)
 .DEFAULT_GOAL   := help
 

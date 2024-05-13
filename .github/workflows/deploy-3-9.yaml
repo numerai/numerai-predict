@@ -62,19 +62,19 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.NUMERAI_CLOUD_ACCOUNT_ID }}:role/github-actions
           aws-region: us-west-2
 
       - name: Build and Push Docker Image
-        run: make push_latest_3_9
+        run: ACCOUNT_ID=${{ secrets.NUMERAI_CLOUD_ACCOUNT_ID }} make push_latest_3_9
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
           aws-region: us-west-2
 
       - name: Build and Push Docker Image
-        run: make push_latest_3_9
+        run: ACCOUNT_ID=${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }} make push_latest_3_9

@@ -52,16 +52,6 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.NUMERAI_CLOUD_ACCOUNT_ID }}:role/github-actions
-          aws-region: us-west-2
-
-      - name: Build and Push Docker Image
-        id: build-push-docker-image
-        run: make push_stable_3_9
-      
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
           role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
           aws-region: us-west-2
 
@@ -109,15 +99,6 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.NUMERAI_CLOUD_ACCOUNT_ID }}:role/github-actions
-          aws-region: us-west-2
-
-      - name: Build and Push Docker Image
-        run: make push_stable_3_10
-    
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
           role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
           aws-region: us-west-2
 
@@ -162,15 +143,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.NUMERAI_CLOUD_ACCOUNT_ID }}:role/github-actions
-          aws-region: us-west-2
-
-      - name: Build and Push Docker Image
-        run: ACCOUNT_ID=${{ secrets.NUMERAI_CLOUD_ACCOUNT_ID }} make push_stable_3_11
-      
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

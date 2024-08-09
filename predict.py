@@ -241,17 +241,22 @@ def main(args):
         RETRY_DELAY = 1.5
         RETRY_EXP = 1.5
         for i in range(MAX_RETRIES):
-            r = requests.post(args.post_url, data=args.post_data, files=files)
-            if r.status_code >= 500:
-                logging.info("Encountered S3 Server Error.")
-            elif r.status_code not in [200, 204]:
-                logging.info(f"HTTP Response Status: {r.status_code}")
-                logging.error(r.reason)
-                logging.error(r.text)
-            else:
-                sys.exit(0)
-            time.sleep(RETRY_DELAY)
-            RETRY_DELAY **= random.uniform(1, RETRY_EXP)
+            try:
+                r = requests.post(args.post_url, data=args.post_data, files=files)
+                if r.status_code >= 500:
+                    logging.info("Encountered S3 Server Error.")
+                elif r.status_code not in [200, 204]:
+                    logging.info(f"HTTP Response Status: {r.status_code}")
+                    logging.error(r.reason)
+                    logging.error(r.text)
+                else:
+                    sys.exit(0)
+            except requests.exceptions.SSLError as e:
+                logging.error(f"SSL Error: {e}")
+            finally:
+                logging.info(f"Retrying in {RETRY_DELAY} seconds...")
+                time.sleep(RETRY_DELAY)
+                RETRY_DELAY **= random.uniform(1, RETRY_EXP)
 
 
 if __name__ == "__main__":

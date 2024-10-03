@@ -26,6 +26,10 @@ build_3_10: ## Build Python 3.10 container
 build_3_11: ## Build Python 3.11 container
 	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
 
+.PHONY: build_shell
+build_shell: ## Build Python 3.11 container
+	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_shell:${GIT_REF} -t ${NAME}_shell:latest -f shell/Dockerfile .
+
 .PHONY: test
 test: test_3_9 test_3_10 test_3_11 ## Test all container versions
 
@@ -70,6 +74,14 @@ push_latest_3_11: build_3_11## Release Python 3.11 contianer tagged latest
 	docker tag ${NAME}_py_3_11:latest ${ECR_REPO}/${NAME}_py_3_11:latest
 	docker push ${ECR_REPO}/${NAME}_py_3_11:${GIT_REF}
 	docker push ${ECR_REPO}/${NAME}_py_3_11:latest
+
+.PHONY: push_latest_shell
+push_latest_shell: build_shell## Release Python 3.11 contianer tagged latest
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	docker tag ${NAME}_shell:${GIT_REF} ${ECR_REPO}/${NAME}_shell:${GIT_REF}
+	docker tag ${NAME}_shell:latest ${ECR_REPO}/${NAME}_shell:latest
+	docker push ${ECR_REPO}/${NAME}_shell:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_shell:latest
 
 .PHONY: push_stable
 push_stable: push_stable_3_9 push_stable_3_10 push_stable_3_11 ## Push all container tagged stable

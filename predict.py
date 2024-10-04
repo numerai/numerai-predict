@@ -20,12 +20,12 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dataset",
-        default="v4.3/live_int8.parquet",
+        default="v5.0/live.parquet",
         help="Numerapi dataset path or local file.",
     )
     parser.add_argument(
         "--benchmarks",
-        default="v4.3/live_benchmark_models.parquet",
+        default="v5.0/live_benchmark_models.parquet",
         help="Numerapi benchmark model path or local file.",
     )
     parser.add_argument("--model", required=True, help="Pickled model file or URL")

@@ -13,6 +13,14 @@ jobs:
       - name: Test Python 3.9
         run: make test_3_9
 
+  test-py-3-9-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test Python 3.9 (validation)
+        run: make test_validation_3_9
+
   test-py-3-10:
     runs-on: ubuntu-latest
     steps:
@@ -21,6 +29,14 @@ jobs:
       - name: Test Python 3.10
         run: make test_3_10
 
+  test-py-3-10-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test Python 3.10 (validation)
+        run: make test_validation_3_10
+
   test-py-3-11:
     runs-on: ubuntu-latest
     steps:
@@ -28,3 +44,11 @@ jobs:
 
       - name: Test Python 3.11
         run: make test_3_11
+
+  test-py-3-11-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test Python 3.11 (validation)
+        run: make test_validation_3_11

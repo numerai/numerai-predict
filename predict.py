@@ -96,7 +96,6 @@ def retry_request_with_backoff(
     retries: int = 10,
     delay_base: float = 1.5,
     delay_exp: float = 1.5,
-    retry_on_status_codes: list[int] = [503],
     debug: bool = False,
 ):
     delay_base = max(1.1, delay_base)
@@ -110,9 +109,9 @@ def retry_request_with_backoff(
             time.sleep(curr_delay)
             curr_delay **= random.uniform(1, delay_exp)
             continue
-        if response.status_code in retry_on_status_codes:
+        if response.status_code >= 500:
             if debug:
-                logging.debug(f"Recieved status {response.status_code}. Retrying...")
+                logging.debug(f"Encountered Server Error. Retrying...")
             time.sleep(curr_delay)
             curr_delay **= random.uniform(1, delay_exp)
         elif response.status_code != 200:

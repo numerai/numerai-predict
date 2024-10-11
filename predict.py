@@ -182,37 +182,53 @@ def main(args):
     if num_args > 1:
         benchmark_models = get_data(args.benchmarks, args.output_dir)
 
-    logging.info(f"Predicting on {len(live_features)} rows of live features")
-    try:
-        if num_args == 1:
-            predictions = model(live_features)
-        elif num_args == 2:
-            predictions = model(live_features, benchmark_models)
-        else:
-            logging.error(
-                f"Invalid pickle function - {model_pkl} must have 1 or 2 arguments"
-            )
-            exit_with_help(1)
+    num_eras = live_features["era"].nunique()
 
-        if predictions is None:
-            logging.error("Pickle function is invalid - returned None")
-            exit_with_help(1)
-        elif type(predictions) != pd.DataFrame:
-            logging.error(
-                f"Pickle function is invalid - returned {type(predictions)} instead of pd.DataFrame"
-            )
-            exit_with_help(1)
-        elif len(predictions) == 0:
-            logging.error("Pickle function returned 0 predictions")
-            exit_with_help(1)
-        elif predictions.isna().any().any():
-            logging.error("Pickle function returned at least 1 NaN prediction")
-            exit_with_help(1)
-        elif not (predictions.iloc[:, 0].between(0, 1).all().all()):
-            logging.error(
-                "Pickle function returned invalid predictions. Ensure values are between 0 and 1."
-            )
-            exit_with_help(1)
+    if num_eras > 1:
+        logging.info(
+            f"Predicting on {len(live_features)} rows, {num_eras} eras of features"
+        )
+    else:
+        logging.info(f"Predicting on {len(live_features)} rows of live features")
+
+    try:
+        predictions = []
+        for era, era_features in live_features.groupby("era"):
+            if num_eras > 1:
+                logging.debug(f"Predicting era {era} with {len(era_features)} rows")
+            if num_args == 1:
+                era_predictions = model(era_features)
+            elif num_args == 2:
+                era_benchmark_models = benchmark_models.loc[era_features.index]
+                era_predictions = model(era_features, era_benchmark_models)
+            else:
+                logging.error(
+                    f"Invalid pickle function - {model_pkl} must have 1 or 2 arguments"
+                )
+                exit_with_help(1)
+            if era_predictions is None:
+                logging.error("Pickle function is invalid - returned None")
+                exit_with_help(1)
+            elif type(era_predictions) != pd.DataFrame:
+                logging.error(
+                    f"Pickle function is invalid - returned {type(era_predictions)} instead of pd.DataFrame"
+                )
+                exit_with_help(1)
+            elif len(era_predictions) != len(era_features):
+                logging.error(
+                    f"Pickle function returned {len(era_predictions)} predictions, expected {len(era_features)}"
+                )
+                exit_with_help(1)
+            elif era_predictions.isna().any().any():
+                logging.error("Pickle function returned at least 1 NaN prediction")
+                exit_with_help(1)
+            elif not (era_predictions.iloc[:, 0].between(0, 1).all().all()):
+                logging.error(
+                    "Pickle function returned invalid predictions. Ensure values are between 0 and 1."
+                )
+                exit_with_help(1)
+            predictions.append(era_predictions)
+        predictions = pd.concat(predictions)
     except TypeError as e:
         logging.error(f"Pickle function is invalid - {e}")
         if args.debug:

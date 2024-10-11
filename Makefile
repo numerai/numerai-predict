@@ -48,6 +48,14 @@ test_3_11: build_3_11 ## Test Python 3.11 pickle
 	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_11:latest --model ${PWD}/tests/models/model_3_11_legacy.pkl
 	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_11:latest --model ${PWD}/tests/models/model_3_11.pkl
 
+test_validation_%: build_% ## Test validation dataset
+	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_$*:latest \
+		--dataset v4.3/validation_int8.parquet --benchmarks v4.3/validation_benchmark_models.parquet \
+		--model ${PWD}/tests/models/model_$*_legacy.pkl
+
+.PHONY: test_validation
+test_validation: test_validation_3_9 test_validation_3_10 test_validation_3_11
+
 .PHONY: push_latest
 push_latest: push_latest_3_9 push_latest_3_10 push_latest_3_11 ## Push latest docker containers
 

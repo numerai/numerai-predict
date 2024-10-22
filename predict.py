@@ -242,16 +242,16 @@ def main(args):
         logging.info("Uploading predictions to %s", args.post_url)
         csv_buffer = io.StringIO()
         predictions.to_csv(csv_buffer)
-        retry_request_with_backoff(
-            lambda: (
-                csv_buffer.seek(0)
-                and requests.post(
-                    args.post_url,
-                    data=args.post_data,
-                    files={"file": (predictions_csv_file_name, csv_buffer, "text/csv")},
-                )
+
+        def post_live_output():
+            csv_buffer.seek(0)
+            return requests.post(
+                args.post_url,
+                data=args.post_data,
+                files={"file": (predictions_csv_file_name, csv_buffer, "text/csv")},
             )
-        )
+
+        retry_request_with_backoff(post_live_output)
     else:
         logging.info("Saving predictions to %s", predictions_csv_file_name)
         with open(predictions_csv_file_name, "w") as f:

@@ -4,6 +4,11 @@
 env/
 venv/
 
+# Python
+*.pyc
+*.pyo
+*/__pycache__/*
+
 # Pickled models
 *.model
 *.bin

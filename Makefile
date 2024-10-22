@@ -31,22 +31,26 @@ build_shell: ## Build Python 3.11 container
 	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_shell:${GIT_REF} -t ${NAME}_shell:latest -f shell/Dockerfile .
 
 .PHONY: test
-test: test_3_9 test_3_10 test_3_11 ## Test all container versions
+test: test_predict test_3_9 test_3_10 test_3_11 ## Test all container versions
+
+.PHONY: test_predict
+test_predict: build_shell ## Test predict script
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_shell:latest python -m unittest tests.test_predict
 
 .PHONY: test_3_9
 test_3_9: build_3_9 ## Test Python 3.9 pickle
-	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_9:latest --model ${PWD}/tests/models/model_3_9_legacy.pkl
-	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_9:latest --model ${PWD}/tests/models/model_3_9.pkl
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_9:latest --model /tests/models/model_3_9_legacy.pkl
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_9:latest --model /tests/models/model_3_9.pkl
 
 .PHONY: test_3_10
 test_3_10: build_3_10 ## Test Python 3.10 pickle
-	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_10:latest --model ${PWD}/tests/models/model_3_10_legacy.pkl
-	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_10:latest --model ${PWD}/tests/models/model_3_10.pkl
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_10:latest --model /tests/models/model_3_10_legacy.pkl
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_10:latest --model /tests/models/model_3_10.pkl
 
 .PHONY: test_3_11
 test_3_11: build_3_11 ## Test Python 3.11 pickle
-	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_11:latest --model ${PWD}/tests/models/model_3_11_legacy.pkl
-	docker run -i --rm -v ${PWD}:${PWD} -v /tmp:/tmp ${NAME}_py_3_11:latest --model ${PWD}/tests/models/model_3_11.pkl
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_11:latest --model /tests/models/model_3_11_legacy.pkl
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_11:latest --model /tests/models/model_3_11.pkl
 
 .PHONY: push_latest
 push_latest: push_latest_3_9 push_latest_3_10 push_latest_3_11 ## Push latest docker containers

@@ -10,6 +10,7 @@ import urllib
 import time
 import random
 import io
+from typing import Callable
 from inspect import signature
 
 from numerapi import NumerAPI
@@ -92,7 +93,7 @@ Try our other support resources:
 
 
 def retry_request_with_backoff(
-    request_func: callable,
+    request_func: Callable[[], requests.Response],
     retries: int = 10,
     delay_base: float = 1.5,
     delay_exp: float = 1.5,
@@ -142,6 +143,27 @@ def get_data(dataset, output_dir):
     logging.info("Loading live features %s", dataset_path)
     live_features = pd.read_parquet(dataset_path)
     return live_features
+
+
+def upload_live_output(
+    predictions: pd.DataFrame,
+    post_url: str,
+    post_data: str,
+    predictions_csv_file_name: str,
+):
+    logging.info("Uploading predictions to %s", post_url)
+    csv_buffer = io.StringIO()
+    predictions.to_csv(csv_buffer)
+
+    def post_live_output():
+        csv_buffer.seek(0)
+        return requests.post(
+            post_url,
+            data=post_data,
+            files={"file": (predictions_csv_file_name, csv_buffer, "text/csv")},
+        )
+
+    retry_request_with_backoff(post_live_output)
 
 
 def main(args):
@@ -239,18 +261,11 @@ def main(args):
         args.output_dir, f"live_predictions-{secrets.token_hex(6)}.csv"
     )
     if args.post_url:
-        logging.info("Uploading predictions to %s", args.post_url)
-        csv_buffer = io.StringIO()
-        predictions.to_csv(csv_buffer)
-        retry_request_with_backoff(
-            lambda: (
-                csv_buffer.seek(0)
-                and requests.post(
-                    args.post_url,
-                    data=args.post_data,
-                    files={"file": (predictions_csv_file_name, csv_buffer, "text/csv")},
-                )
-            )
+        upload_live_output(
+            predictions,
+            args.post_url,
+            args.post_data,
+            predictions_csv_file_name,
         )
     else:
         logging.info("Saving predictions to %s", predictions_csv_file_name)

@@ -9,9 +9,9 @@ RUN apt-get update -yqq \
         git \
         python3-dev
 
-COPY ./requirements.txt .
+COPY ./py3.10/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-COPY ./predict.py .
+COPY ./redict.py .
 ENTRYPOINT ["python", "predict.py"]

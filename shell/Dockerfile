@@ -9,7 +9,7 @@ RUN apt-get update -yqq \
     git \
     python3-dev
 
-COPY ./requirements.txt .
+COPY ./py3.11/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 

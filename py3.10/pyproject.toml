@@ -95,7 +95,11 @@ dependencies = [
     "werkzeug (==2.3.4)",
     "wrapt (==1.14.1)",
     "xgboost (==1.7.5)",
-    "yarl (==1.9.2)"
+    "yarl (==1.9.2)",
+    "onnx (==1.17.0)",
+    "skorch (>=1.1.0,<2.0.0)",
+    "numba (>=0.61.2,<0.62.0)",
+    "tabpfn (==0.1.11)"
 ]
 
 # removed "tensorflow-decision-forests (==1.8.1)", possibly add ydf via 0.4.3

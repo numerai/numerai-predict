@@ -96,6 +96,10 @@ dependencies = [
     "tensorflow (>=2.19.0,<2.20.0)",
     "google-auth (>=2.40.3,<3.0.0)",
     "google-auth-oauthlib (>=1.2.2,<2.0.0)",
+    "onnx (>=1.18.0,<2.0.0)",
+    "skorch (>=1.1.0,<2.0.0)",
+    "numba (>=0.61.2,<0.62.0)",
+    "tabpfn (>=2.1.0,<3.0.0)",
 ]
 
 # removed "tensorflow-decision-forests (==1.8.1)", possibly add ydf via 0.4.3

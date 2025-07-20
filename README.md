@@ -16,7 +16,8 @@ make build_3_11 DOCKER_BUILDKIT=0
 You can run a local pickle model via
 
 ```bash
-docker run -i --rm -v "$PWD:$PWD" ghcr.io/numerai/numerai_predict_py_3_11:stable --model $PWD/model.pkl
+docker run -i --rm -v "$PWD:$PWD" ghcr.io/numerai/numerai_predict_py_3_11:stable --debug --model $PWD/model.pkl
+# optionally, you can run with --platform linux/amd64 or --platform linux/arm64 depending on host architecture
 ```
 
 ## Presigned S3 URLs

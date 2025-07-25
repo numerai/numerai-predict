@@ -49,6 +49,7 @@ test_3_11: build_3_11 ## Test Python 3.11 pickle
 
 .PHONY: test_3_12
 test_3_12: build_3_12 ## Test Python 3.12 pickle
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_12:latest --model /tests/models/model_3_12_legacy.pkl
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_12:latest --model /tests/models/model_3_12.pkl
 
 .PHONY: push_latest

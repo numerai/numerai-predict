@@ -12,6 +12,9 @@ venv/
 # Pickled models
 *.model
 *.bin
+*.pkl
+
+!tests/**/*.pkl
 
 # Mac OSX
 .DS_Store

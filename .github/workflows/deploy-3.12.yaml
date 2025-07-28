@@ -1,0 +1,71 @@
+name: Deploy Python 3.12 Image
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: numerai_predict
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  public-py311-image:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Extract short git SHA
+        run: echo "GIT_REF=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+
+      - name: Log in to Github Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}_py_3_12
+
+      - name: Push Docker image as LATEST to Github Container registry
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          file: ./py3.12/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}_py_3_12:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Push Docker image git ref to Github Container registry
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          file: ./py3.12/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}_py_3_12:${{ env.GIT_REF }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  internal-py311-image:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
+          aws-region: us-west-2
+
+      - name: Build and Push Docker Image
+        run: ACCOUNT_ID=${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }} make push_latest_3_12

@@ -53,7 +53,7 @@ def parse_args():
 
     if args.post_data:
         data = urllib.parse.parse_qs(args.post_data)
-        if type(data) != dict:
+        if type(data) is not dict:
             raise argparse.ArgumentError(
                 "--post_data must be urlencoded and resolve to dict"
             )
@@ -228,7 +228,7 @@ def main(args):
         if predictions is None:
             logging.error("Pickle function is invalid - returned None")
             exit_with_help(1)
-        elif type(predictions) != pd.DataFrame:
+        elif type(predictions) is not pd.DataFrame:
             logging.error(
                 "Pickle function is invalid - returned %s instead of pd.DataFrame",
                 type(predictions),
@@ -269,8 +269,10 @@ def main(args):
         )
     else:
         logging.info("Saving predictions to %s", predictions_csv_file_name)
-        with open(predictions_csv_file_name, "w") as f:
-            predictions.to_csv(f)
+    try:
+        predictions.to_csv(predictions_csv_file_name, index=True)
+    except Exception as e:
+        logging.error("Error writing predictions to CSV: %s", e)
 
 
 if __name__ == "__main__":

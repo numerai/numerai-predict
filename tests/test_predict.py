@@ -2,8 +2,6 @@
 Set up python unittests for the predict module
 """
 
-import os
-import sys
 import unittest
 from unittest import mock
 

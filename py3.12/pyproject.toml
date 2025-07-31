@@ -100,6 +100,7 @@ dependencies = [
     "skorch (>=1.1.0,<2.0.0)",
     "numba (>=0.61.2,<0.62.0)",
     "tabpfn (>=2.1.0,<3.0.0)",
+    "tensorflow-decision-forests (>=1.12.0,<2.0.0)",
 ]
 
 # removed "tensorflow-decision-forests (==1.8.1)", possibly add ydf via 0.4.3

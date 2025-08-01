@@ -10,29 +10,28 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Test predict.py
         run: make test_predict
 
-  test-py-3-10:
+  test-docker:
+    strategy:
+      matrix:
+        python-version: ['3_10', '3_11', '3_12']
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: Test Python 3.10
-        run: make test_3_10
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-  test-py-3-11:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Test Python 3.11
-        run: make test_3_11
-
-  test-py-3-12:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Test Python 3.12
-        run: make test_3_12
+      - name: Test Python ${{ matrix.python-version }}
+        run: make test_${{ matrix.python-version }}

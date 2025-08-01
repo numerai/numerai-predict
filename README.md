@@ -1,5 +1,13 @@
 # Numerai Model Prediction Docker Environment
 
+## Poetry vs. Requirements.txt
+We prefer to do dependency management and solving through poetry because it's more sophisticated and powerful, but we also provide a requirements.txt for anyone that doesn't like to use poetry.
+
+To convert from poetry to requirements.txt simply run:
+```bash
+poetry export --output requirements.txt
+```
+
 ## Building the docker images locally
 
 You can use `make` to build the docker containers on any of supported python versions:

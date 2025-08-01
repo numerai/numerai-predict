@@ -11,11 +11,11 @@ on:
       - master
 
 jobs:
-  public-image:
+  public-images:
     strategy:
       matrix:
         python-version: ['3{0}10', '3{0}11', '3{0}12']
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       packages: write
       contents: read
@@ -62,11 +62,11 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}_py_${{ format(matrix.python-version, '_') }}:${{ env.GIT_REF }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  internal-py312-image:
+  internal-images:
     strategy:
       matrix:
         python-version: ['3{0}10', '3{0}11', '3{0}12']
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       id-token: write
       contents: read

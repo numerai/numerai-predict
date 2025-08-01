@@ -1,5 +1,22 @@
 # Numerai Model Prediction Docker Environment
 
+## Poetry vs. Requirements.txt
+We prefer to do dependency management and solving through poetry because it's more sophisticated and powerful, but we also provide a requirements.txt for anyone that doesn't like to use poetry.
+
+To install poetry locally, run:
+
+```bash
+curl -sSL https://install.python-poetry.org | python -
+```
+
+To convert from poetry to requirements.txt simply run:
+```bash
+poetry export -f requirements.txt --without-hashes --output requirements.txt
+
+# the following regex can be applied to remove the `python_full_version` and `python_version` tags on each row:
+sed -i '' 's/; .*$//g' requirements.txt
+```
+
 ## Building the docker images locally
 
 You can use `make` to build the docker containers on any of supported python versions:

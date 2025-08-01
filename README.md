@@ -42,3 +42,23 @@ presigned_post = s3_client.generate_presigned_post(Bucket='numerai-pickled-user-
 post_url = presigned_post['url']
 post_data = urllib.parse.urlencode(presigned_post['fields'])
 ```
+
+## Dependency management
+
+Dependencies are managed for each supported python version using poetry. To install poetry locally, run:
+
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+Additionally, `requirements.txt` can be generated from each `pyproject.toml` using the following command:
+
+```bash
+poetry export -f requirements.txt --without-hashes --output requirements.txt
+```
+
+And the following regex can be applied to remove the `python_full_version` and `python_version` tags on each row:
+
+```bash
+sed -i '' 's/; .*$//g' requirements.txt
+```

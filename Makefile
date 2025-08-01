@@ -16,19 +16,19 @@ build:	build_3_10 build_3_11 build_3_12 ## Build all Python containers
 
 .PHONY: build_3_10
 build_3_10: ## Build Python 3.10 container
-	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_10:${GIT_REF} -t ${NAME}_py_3_10:latest -f py3.10/Dockerfile .
+	docker build --platform=linux/amd64 --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_10:${GIT_REF} -t ${NAME}_py_3_10:latest -f py3.10/Dockerfile .
 
 .PHONY: build_3_11
 build_3_11: ## Build Python 3.11 container
-	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
+	docker build --platform=linux/amd64 --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_11:${GIT_REF} -t ${NAME}_py_3_11:latest -f py3.11/Dockerfile .
 
 .PHONY: build_3_12
 build_3_12: ## Build Python 3.12 container
-	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_12:${GIT_REF} -t ${NAME}_py_3_12:latest -f py3.12/Dockerfile .
+	docker build --platform=linux/amd64 --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_12:${GIT_REF} -t ${NAME}_py_3_12:latest -f py3.12/Dockerfile .
 
 .PHONY: build_shell
 build_shell: ## Build Python 3.11 container
-	docker build --build-arg GIT_REF=${GIT_REF} -t ${NAME}_shell:${GIT_REF} -t ${NAME}_shell:latest -f shell/Dockerfile .
+	docker build --platform=linux/amd64 --build-arg GIT_REF=${GIT_REF} -t ${NAME}_shell:${GIT_REF} -t ${NAME}_shell:latest -f shell/Dockerfile .
 
 .PHONY: test
 test: test_predict test_3_10 test_3_11 test_3_12 ## Test all container versions

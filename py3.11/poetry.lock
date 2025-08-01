@@ -3480,6 +3480,35 @@ wrapt = ">=1.11.0"
 and-cuda = ["nvidia-cublas-cu12 (==12.5.3.2)", "nvidia-cuda-cupti-cu12 (==12.5.82)", "nvidia-cuda-nvcc-cu12 (==12.5.82)", "nvidia-cuda-nvrtc-cu12 (==12.5.82)", "nvidia-cuda-runtime-cu12 (==12.5.82)", "nvidia-cudnn-cu12 (==9.3.0.75)", "nvidia-cufft-cu12 (==11.2.3.61)", "nvidia-curand-cu12 (==10.3.6.82)", "nvidia-cusolver-cu12 (==11.6.3.83)", "nvidia-cusparse-cu12 (==12.5.1.3)", "nvidia-nccl-cu12 (==2.23.4)", "nvidia-nvjitlink-cu12 (==12.5.82)"]
 
 [[package]]
+name = "tensorflow-decision-forests"
+version = "1.12.0"
+description = "Collection of training and inference decision forest algorithms."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "tensorflow_decision_forests-1.12.0-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:d0af6be361121db1317efd29147daae124cc0d98edcf8776b077fc429737ab87"},
+    {file = "tensorflow_decision_forests-1.12.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:41401e6b24e958e5edb8e354de76a3e290e707050ca8190acd65b030aafc139c"},
+    {file = "tensorflow_decision_forests-1.12.0-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:43e11ffcb18a097789ecfde0871a5130d6ffb8a6aaaf2307c072faa74f6d9f48"},
+    {file = "tensorflow_decision_forests-1.12.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:990dcac0874c4b8cf646ab3438b8f804c522e8ebcc0b35116ea02cf05f46e026"},
+    {file = "tensorflow_decision_forests-1.12.0-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:14ffa15864d10782445044302e42d0d88d07536669578f66fbeccdc20b1a9ed2"},
+    {file = "tensorflow_decision_forests-1.12.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d80ad5f29efa566adfd09fca61584a41666a20e064585a64c777a1df85a5d2e6"},
+    {file = "tensorflow_decision_forests-1.12.0-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:3daa473ccf05b7aa33f104212b497698be6c42a74d3e761777314cb88f6822d8"},
+    {file = "tensorflow_decision_forests-1.12.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6b224809745231204e8e049f98d32b93c04075d9f9ec8d3bbcd5ae4e58ba7db2"},
+]
+
+[package.dependencies]
+absl_py = "*"
+numpy = "*"
+pandas = "*"
+six = "*"
+tensorflow = "2.19.0"
+tf_keras = ">=2.19,<3.0"
+wheel = "*"
+wurlitzer = "*"
+ydf = ">=0.11.0"
+
+[[package]]
 name = "tensorflow-estimator"
 version = "2.15.0"
 description = "TensorFlow Estimator."
@@ -3537,6 +3566,21 @@ files = [
 
 [package.extras]
 tests = ["pytest", "pytest-cov"]
+
+[[package]]
+name = "tf-keras"
+version = "2.19.0"
+description = "Deep learning for humans."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "tf_keras-2.19.0-py3-none-any.whl", hash = "sha256:4f339e800987b39d1548a8c76a7b33b6801a97ec7fcd89c299ec29741f7890bd"},
+    {file = "tf_keras-2.19.0.tar.gz", hash = "sha256:b09a407d87a4571ce1e8ca985cfc68483e3d63b2518a5d79a97ad92cb64dbe9c"},
+]
+
+[package.dependencies]
+tensorflow = ">=2.19,<2.20"
 
 [[package]]
 name = "threadpoolctl"
@@ -3897,6 +3941,18 @@ files = [
 ]
 
 [[package]]
+name = "wurlitzer"
+version = "3.1.1"
+description = "Capture C-level output in context managers"
+optional = false
+python-versions = ">=3.5"
+groups = ["main"]
+files = [
+    {file = "wurlitzer-3.1.1-py3-none-any.whl", hash = "sha256:0b2749c2cde3ef640bf314a9f94b24d929fe1ca476974719a6909dfc568c3aac"},
+    {file = "wurlitzer-3.1.1.tar.gz", hash = "sha256:bfb9144ab9f02487d802b9ff89dbd3fa382d08f73e12db8adc4c2fb00cd39bd9"},
+]
+
+[[package]]
 name = "xgboost"
 version = "3.0.2"
 description = "XGBoost Python Package"
@@ -4045,7 +4101,37 @@ idna = ">=2.0"
 multidict = ">=4.0"
 propcache = ">=0.2.1"
 
+[[package]]
+name = "ydf"
+version = "0.13.0"
+description = "YDF (short for Yggdrasil Decision Forests) is a library for training, serving, evaluating and analyzing decision forest models such as Random Forest and Gradient Boosted Trees."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "ydf-0.13.0-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:fdea7854d9c5d81267a42732d11efa242938fbc8a3c0795a876c184e4c242bca"},
+    {file = "ydf-0.13.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:84d96ffa416176aa0b09c063adae753c5879f20e546fc284e1b0f1bfd6bdeda4"},
+    {file = "ydf-0.13.0-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:a920f331e16f3f6d1da64a27c6bf3655483c7e3bd1ce4bf4f3d52422ebcdcc93"},
+    {file = "ydf-0.13.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fca5167e2da14bbd4a1120ead71843769d046e2840f2fbcba8b9aaa3d581dd09"},
+    {file = "ydf-0.13.0-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:20108f07edac014cbf6bd38c14fdb93e547a91ebf71ed36246df4d5c85943960"},
+    {file = "ydf-0.13.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b9efc1d0483657daaeff294a826490ffbd0e32bd2df552978bd84596eb54f0a6"},
+    {file = "ydf-0.13.0-cp313-cp313-macosx_12_0_arm64.whl", hash = "sha256:771bc68c3f001b935a43dca99d8abebfce6cb47adfe4265d393acd74b520c619"},
+    {file = "ydf-0.13.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4bf147d1e068cbe10d453ba4ccc3f143b592b38ef87e319edd7d133e358f0338"},
+    {file = "ydf-0.13.0-cp38-cp38-macosx_12_0_arm64.whl", hash = "sha256:d3cdb40d4d06f063caba01ceab066dfcbe82102946c0b4491e3ac2c64197a587"},
+    {file = "ydf-0.13.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c260b1fd34c9390409660bf8986cebbf91b1b2f3d41792ccd3dcb7195eef47f8"},
+    {file = "ydf-0.13.0-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:8d1d7ce20ad80e7f990af2dafc4367e4e1c80bc22c39b324dac8fe0d27161eeb"},
+    {file = "ydf-0.13.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4d278493cde628ad1b6dff61e9b9c610c42f5a0ff8dfcef58a7a9c1f4a2aeac9"},
+]
+
+[package.dependencies]
+absl_py = "*"
+numpy = "*"
+protobuf = ">=5.29.1,<7.0.0"
+
+[package.extras]
+pandas = ["pandas"]
+
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11.13,<3.12"
-content-hash = "59265f154d8b20dba471f1053e922480abfa21f72be6236e80139d6dd1459dea"
+content-hash = "c893ddd1076eaf8b656d7a876a89cc0e653cb41ec5bbbad61899e168674e5b82"

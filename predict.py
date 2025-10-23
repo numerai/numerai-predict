@@ -152,11 +152,10 @@ def upload_live_output(
     predictions_csv_file_name: str,
 ):
     logging.info("Uploading predictions to %s", post_url)
-    csv_buffer = io.StringIO()
-    predictions.to_csv(csv_buffer)
+    csv_payload = predictions.to_csv()
 
     def post_live_output():
-        csv_buffer.seek(0)
+        csv_buffer = io.BytesIO(csv_payload.encode("utf-8"))
         return requests.post(
             post_url,
             data=post_data,

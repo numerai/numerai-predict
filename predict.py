@@ -21,12 +21,12 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dataset",
-        default="v5.0/live.parquet",
+        default="v5.2/live.parquet",
         help="Numerapi dataset path or local file.",
     )
     parser.add_argument(
         "--benchmarks",
-        default="v5.0/live_benchmark_models.parquet",
+        default="v5.2/live_benchmark_models.parquet",
         help="Numerapi benchmark model path or local file.",
     )
     parser.add_argument("--model", required=True, help="Pickled model file or URL")
@@ -114,15 +114,20 @@ def retry_request_with_backoff(
                 return response
             else:
                 raise RuntimeError(f"HTTP Error {response.reason} - {response.text}")
-        except requests.exceptions.ConnectionError:
-            logging.error("Connection reset! Retrying...")
+        except requests.exceptions.SSLError as e:
+            logging.error("SSL Error: %s. Retrying...", e)
             time.sleep(curr_delay)
             curr_delay **= random.uniform(1, delay_exp)
-            continue
-        except requests.exceptions.SSLError as e:
-            logging.error("SSL Error: %s", e)
-        finally:
-            logging.info("Retrying in %s seconds...", curr_delay)
+        except requests.exceptions.ConnectionError as e:
+            logging.error("Connection error: %s. Retrying...", e)
+            time.sleep(curr_delay)
+            curr_delay **= random.uniform(1, delay_exp)
+        except requests.exceptions.Timeout as e:
+            logging.error("Request timed out: %s. Retrying...", e)
+            time.sleep(curr_delay)
+            curr_delay **= random.uniform(1, delay_exp)
+        except requests.exceptions.RequestException as e:
+            logging.error("Request error: %s. Retrying...", e)
             time.sleep(curr_delay)
             curr_delay **= random.uniform(1, delay_exp)
     raise RuntimeError(f"Could not complete function call after {retries} retries...")

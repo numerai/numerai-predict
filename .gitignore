@@ -22,3 +22,4 @@ venv/
 # ide
 .vscode
 .idea
+.python-version

@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         python-version: ['3{0}10', '3{0}11', '3{0}12']
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4core
     permissions:
       packages: write
       contents: read
@@ -66,7 +66,7 @@ jobs:
     strategy:
       matrix:
         python-version: ['3{0}10', '3{0}11', '3{0}12']
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4core
     permissions:
       id-token: write
       contents: read

@@ -22,7 +22,7 @@ jobs:
   test-docker:
     strategy:
       matrix:
-        python-version: ['3_10', '3_11', '3_12']
+        python-version: ['3_10', '3_11', '3_12', '3_13']
     runs-on: ubuntu-latest-4core
     steps:
       - uses: actions/checkout@v2

@@ -22,18 +22,18 @@ sed -i '' 's/; .*$//g' requirements.txt
 You can use `make` to build the docker containers on any of supported python versions:
 
 ```bash
-# to build on python 3.11
-make build_3_11
+# to build on python 3.13
+make build_3_13
 
 # if you need to force the cache to refresh
-make build_3_11 DOCKER_BUILDKIT=0
+make build_3_13 DOCKER_BUILDKIT=0
 ```
 
 ## Local testing of pickle models
 You can run a local pickle model via
 
 ```bash
-docker run -i --rm -v "$PWD:$PWD" ghcr.io/numerai/numerai_predict_py_3_11:stable --debug --model $PWD/model.pkl
+docker run -i --rm -v "$PWD:$PWD" ghcr.io/numerai/numerai_predict_py_3_13:stable --debug --model $PWD/model.pkl
 # optionally, you can run with --platform linux/amd64 or --platform linux/arm64 depending on host architecture
 ```
 

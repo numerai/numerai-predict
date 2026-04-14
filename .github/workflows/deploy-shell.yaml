@@ -3,15 +3,18 @@ name: Deploy Shell Image (3.11 only)
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: numerai_predict
+  MODEL_UPLOADS_ECR_ACCOUNT_ID: ${{ github.ref == 'refs/heads/staging' && secrets.MODEL_UPLOADS_STAGING_ACCOUNT_ID || secrets.MODEL_UPLOADS_ACCOUNT_ID }}
 
 on:
   workflow_dispatch:
   push:
     branches:
       - master
+      - staging
 
 jobs:
   public-py311-image:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest-4core
     permissions:
       packages: write
@@ -34,7 +37,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}_shell
-      
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -70,8 +73,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }}:role/github-actions
+          role-to-assume: arn:aws:iam::${{ env.MODEL_UPLOADS_ECR_ACCOUNT_ID }}:role/github-actions
           aws-region: us-west-2
 
       - name: Build and Push Docker Image
-        run: ACCOUNT_ID=${{ secrets.MODEL_UPLOADS_ACCOUNT_ID }} make push_latest_shell
+        run: ACCOUNT_ID=${{ env.MODEL_UPLOADS_ECR_ACCOUNT_ID }} make push_latest_shell

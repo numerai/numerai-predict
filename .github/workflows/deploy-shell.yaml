@@ -20,7 +20,7 @@ jobs:
       packages: write
       contents: read
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Extract short git SHA
         run: echo "GIT_REF=`git rev-parse --short HEAD`" >> $GITHUB_ENV
@@ -39,10 +39,10 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}_shell
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Push Docker image as LATEST to Github Container registry
         uses: docker/build-push-action@v6
@@ -68,10 +68,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::${{ env.MODEL_UPLOADS_ECR_ACCOUNT_ID }}:role/github-actions
           aws-region: us-west-2

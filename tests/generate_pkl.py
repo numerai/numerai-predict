@@ -12,7 +12,7 @@ This script:
 3. Copies it to tests/models/ with the appropriate naming convention
 
 Arguments:
-    --version: Python version directory (e.g., py3.10, py3.11, py3.12, py3.13)
+    --version: Python version directory (e.g., py3.10, py3.11, py3.12, py3.13, py3.14)
     --notebook-path: Path to the Jupyter notebook (relative or absolute)
     --legacy: If set, names the output as model_X_XX_legacy.pkl (for 1-arg predict functions)
     --output-name: Override the output pkl filename in the notebook directory (default: auto-detect)
@@ -140,7 +140,7 @@ def main():
     parser.add_argument(
         "--version",
         required=True,
-        help="Python version directory (e.g., py3.10, py3.11, py3.12, py3.13)"
+        help="Python version directory (e.g., py3.10, py3.11, py3.12, py3.13, py3.14)"
     )
     parser.add_argument(
         "--notebook-path",

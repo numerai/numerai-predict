@@ -12,7 +12,7 @@ lint: ## Run linter
 	ruff check . --fix
 
 .PHONY: build
-build:	build_3_10 build_3_11 build_3_12 build_3_13 ## Build all Python containers
+build:	build_3_10 build_3_11 build_3_12 build_3_13 build_3_14 ## Build all Python containers
 
 .PHONY: build_3_10
 build_3_10: ## Build Python 3.10 container
@@ -30,39 +30,54 @@ build_3_12: ## Build Python 3.12 container
 build_3_13: ## Build Python 3.13 container
 	docker build --platform=linux/amd64 --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_13:${GIT_REF} -t ${NAME}_py_3_13:latest -f py3.13/Dockerfile .
 
+.PHONY: build_3_14
+build_3_14: ## Build Python 3.14 container
+	docker build --platform=linux/amd64 --build-arg GIT_REF=${GIT_REF} -t ${NAME}_py_3_14:${GIT_REF} -t ${NAME}_py_3_14:latest -f py3.14/Dockerfile .
+
 .PHONY: build_shell
 build_shell: ## Build Python 3.11 container
 	docker build --platform=linux/amd64 --build-arg GIT_REF=${GIT_REF} -t ${NAME}_shell:${GIT_REF} -t ${NAME}_shell:latest -f shell/Dockerfile .
 
 .PHONY: test
-test: test_predict test_3_10 test_3_11 test_3_12 test_3_13 ## Test all container versions
+test: test_predict test_3_10 test_3_11 test_3_12 test_3_13 test_3_14 ## Test all container versions
 
 .PHONY: test_predict
-test_predict: build_shell ## Test predict script
+test_predict: ## Test predict script
+	@if ! docker image inspect ${NAME}_shell:latest >/dev/null 2>&1; then $(MAKE) build_shell; fi
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_shell:latest python -m unittest tests.test_predict
 
 .PHONY: test_3_10
-test_3_10: build_3_10 ## Test Python 3.10 pickle
+test_3_10: ## Test Python 3.10 pickle
+	@if ! docker image inspect ${NAME}_py_3_10:latest >/dev/null 2>&1; then $(MAKE) build_3_10; fi
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_10:latest --model /tests/models/model_3_10_legacy.pkl
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_10:latest --model /tests/models/model_3_10.pkl
 
 .PHONY: test_3_11
-test_3_11: build_3_11 ## Test Python 3.11 pickle
+test_3_11: ## Test Python 3.11 pickle
+	@if ! docker image inspect ${NAME}_py_3_11:latest >/dev/null 2>&1; then $(MAKE) build_3_11; fi
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_11:latest --model /tests/models/model_3_11_legacy.pkl
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_11:latest --model /tests/models/model_3_11.pkl
 
 .PHONY: test_3_12
-test_3_12: build_3_12 ## Test Python 3.12 pickle
+test_3_12: ## Test Python 3.12 pickle
+	@if ! docker image inspect ${NAME}_py_3_12:latest >/dev/null 2>&1; then $(MAKE) build_3_12; fi
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_12:latest --model /tests/models/model_3_12_legacy.pkl
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_12:latest --model /tests/models/model_3_12.pkl
 
 .PHONY: test_3_13
-test_3_13: build_3_13 ## Test Python 3.13 pickle
+test_3_13: ## Test Python 3.13 pickle
+	@if ! docker image inspect ${NAME}_py_3_13:latest >/dev/null 2>&1; then $(MAKE) build_3_13; fi
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_13:latest --model /tests/models/model_3_13_legacy.pkl
 	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_13:latest --model /tests/models/model_3_13.pkl
 
+.PHONY: test_3_14
+test_3_14: ## Test Python 3.14 pickle
+	@if ! docker image inspect ${NAME}_py_3_14:latest >/dev/null 2>&1; then $(MAKE) build_3_14; fi
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_14:latest --model /tests/models/model_3_14_legacy.pkl
+	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_14:latest --model /tests/models/model_3_14.pkl
+
 .PHONY: push_latest
-push_latest: push_latest_3_10 push_latest_3_11 push_latest_3_12 push_latest_3_13 ## Push latest docker containers
+push_latest: push_latest_3_10 push_latest_3_11 push_latest_3_12 push_latest_3_13 push_latest_3_14 ## Push latest docker containers
 
 .PHONY: push_latest_3_10
 push_latest_3_10: build_3_10 ## Release Python 3.10 container tagged latest
@@ -96,6 +111,14 @@ push_latest_3_13: build_3_13 ## Release Python 3.13 container tagged latest
 	docker push ${ECR_REPO}/${NAME}_py_3_13:${GIT_REF}
 	docker push ${ECR_REPO}/${NAME}_py_3_13:latest
 
+.PHONY: push_latest_3_14
+push_latest_3_14: build_3_14 ## Release Python 3.14 container tagged latest
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	docker tag ${NAME}_py_3_14:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_14:${GIT_REF}
+	docker tag ${NAME}_py_3_14:latest ${ECR_REPO}/${NAME}_py_3_14:latest
+	docker push ${ECR_REPO}/${NAME}_py_3_14:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_py_3_14:latest
+
 .PHONY: push_latest_shell
 push_latest_shell: build_shell ## Release Python 3.11 container tagged latest
 	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
@@ -105,7 +128,7 @@ push_latest_shell: build_shell ## Release Python 3.11 container tagged latest
 	docker push ${ECR_REPO}/${NAME}_shell:latest
 
 .PHONY: push_stable
-push_stable: push_stable_3_10 push_stable_3_11 push_stable_3_12 push_stable_3_13 ## Push all container tagged stable
+push_stable: push_stable_3_10 push_stable_3_11 push_stable_3_12 push_stable_3_13 push_stable_3_14 ## Push all container tagged stable
 
 .PHONY: push_stable_3_10
 push_stable_3_10: build_3_10 ## Release Python 3.10 container tagged stable
@@ -138,3 +161,11 @@ push_stable_3_13: build_3_13 ## Release Python 3.13 container tagged stable
 	docker tag ${NAME}_py_3_13:latest ${ECR_REPO}/${NAME}_py_3_13:stable
 	docker push ${ECR_REPO}/${NAME}_py_3_13:${GIT_REF}
 	docker push ${ECR_REPO}/${NAME}_py_3_13:stable
+
+.PHONY: push_stable_3_14
+push_stable_3_14: build_3_14 ## Release Python 3.14 container tagged stable
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+	docker tag ${NAME}_py_3_14:${GIT_REF} ${ECR_REPO}/${NAME}_py_3_14:${GIT_REF}
+	docker tag ${NAME}_py_3_14:latest ${ECR_REPO}/${NAME}_py_3_14:stable
+	docker push ${ECR_REPO}/${NAME}_py_3_14:${GIT_REF}
+	docker push ${ECR_REPO}/${NAME}_py_3_14:stable

@@ -66,6 +66,18 @@ def py_version(separator="."):
     return separator.join(sys.version.split(".")[:2])
 
 
+def is_python_version_pickle_error(error):
+    error_message = str(error).lower()
+    return any(
+        message in error_message
+        for message in (
+            "unsupported pickle protocol",
+            "code expected at most",
+            "bad marshal data",
+        )
+    )
+
+
 def exit_with_help(error):
     git_ref = os.getenv("GIT_REF", "latest")
     docker_image_path = (
@@ -200,7 +212,26 @@ def main(args):
             logging.exception(e)
         exit_with_help(1)
     except TypeError as e:
-        logging.error("Pickle incompatible with %s", py_version())
+        if is_python_version_pickle_error(e):
+            logging.error(
+                "Pickle could not be loaded in Python %s. It was likely created with a different Python version. Recreate the pickle with Python %s or submit it to the matching numerai-predict image.",
+                py_version(),
+                py_version(),
+            )
+        else:
+            logging.error("Pickle incompatible with %s", py_version())
+        if args.debug:
+            logging.exception(e)
+        exit_with_help(1)
+    except ValueError as e:
+        if is_python_version_pickle_error(e):
+            logging.error(
+                "Pickle could not be loaded in Python %s. It was likely created with a different Python version. Recreate the pickle with Python %s or submit it to the matching numerai-predict image.",
+                py_version(),
+                py_version(),
+            )
+        else:
+            logging.error("Invalid pickle - %s", e)
         if args.debug:
             logging.exception(e)
         exit_with_help(1)

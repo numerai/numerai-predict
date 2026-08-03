@@ -15,6 +15,13 @@ class TestPredict(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test__parse_args_uses_current_live_data(self):
+        with mock.patch("sys.argv", ["predict.py", "--model", "model.pkl"]):
+            args = predict.parse_args()
+
+        self.assertEqual(args.dataset, "v5.3/live.parquet")
+        self.assertEqual(args.benchmarks, "v5.3/live_benchmark_models.parquet")
+
     def test__is_python_version_pickle_error(self):
         self.assertTrue(
             predict.is_python_version_pickle_error(
@@ -80,8 +87,8 @@ class TestPredict(unittest.TestCase):
 
     def test__main_exits_with_help_on_python_version_pickle_mismatch(self):
         args = argparse.Namespace(
-            dataset="v5.2/live.parquet",
-            benchmarks="v5.2/live_benchmark_models.parquet",
+            dataset="v5.3/live.parquet",
+            benchmarks="v5.3/live_benchmark_models.parquet",
             model="model.pkl",
             output_dir="/tmp",
             post_url=None,

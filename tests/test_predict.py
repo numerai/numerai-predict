@@ -80,8 +80,8 @@ class TestPredict(unittest.TestCase):
 
     def test__main_exits_with_help_on_python_version_pickle_mismatch(self):
         args = argparse.Namespace(
-            dataset="v5.2/live.parquet",
-            benchmarks="v5.2/live_benchmark_models.parquet",
+            dataset="v5.3/live.parquet",
+            benchmarks="v5.3/live_benchmark_models.parquet",
             model="model.pkl",
             output_dir="/tmp",
             post_url=None,

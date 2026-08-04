@@ -21,7 +21,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dataset",
-        default="v5.3/live.parquet",
+        default="v5.2/live.parquet",
         help="Numerapi dataset path or local file.",
     )
     parser.add_argument(

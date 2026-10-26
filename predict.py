@@ -249,6 +249,13 @@ def main(args):
         benchmark_models = get_data(args.benchmarks, args.output_dir)
 
     logging.info("Predicting on %s rows of live features", len(live_features))
+    # Keep identity even if the user's function modifies its input DataFrame.
+    identity_columns = ["numerai_ticker", "date"]
+    live_identity = (
+        live_features[identity_columns].copy()
+        if all(column in live_features for column in identity_columns)
+        else None
+    )
     try:
         if num_args == 1:
             predictions = model(live_features)
@@ -272,7 +279,33 @@ def main(args):
         elif len(predictions) == 0:
             logging.error("Pickle function returned 0 predictions")
             exit_with_help(1)
-        elif predictions.isna().any().any():
+        # Unity files have row indexes rather than the legacy stock-ID index.
+        # Preserve identity for both live submissions and dated diagnostics.
+        if live_identity is not None:
+            if (
+                not live_identity.index.is_unique
+                or not predictions.index.is_unique
+                or len(predictions) != len(live_identity)
+                or not predictions.index.isin(live_identity.index).all()
+            ):
+                raise ValueError(
+                    "v6 predictions must preserve every input row index exactly once"
+                )
+            identity = live_identity.loc[predictions.index]
+            for column in identity_columns:
+                if (
+                    column in predictions
+                    and not predictions[column]
+                    .astype(str)
+                    .eq(identity[column].astype(str))
+                    .all()
+                ):
+                    raise ValueError(f"v6 output {column} does not match its input row")
+            predictions = predictions.drop(
+                columns=identity_columns, errors="ignore"
+            ).join(identity)
+
+        if predictions.isna().any().any():
             logging.error("Pickle function returned at least 1 NaN prediction")
             exit_with_help(1)
         elif not (predictions.iloc[:, 0].between(0, 1).all().all()):

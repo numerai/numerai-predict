@@ -49,32 +49,27 @@ test_predict: ## Test predict script
 .PHONY: test_3_10
 test_3_10: ## Test Python 3.10 pickle
 	@if ! docker image inspect ${NAME}_py_3_10:latest >/dev/null 2>&1; then $(MAKE) build_3_10; fi
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_10:latest --model /tests/models/model_3_10_legacy.pkl
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_10:latest --model /tests/models/model_3_10.pkl
+	docker run -i --rm --entrypoint python -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_10:latest -m unittest tests.test_predict
 
 .PHONY: test_3_11
 test_3_11: ## Test Python 3.11 pickle
 	@if ! docker image inspect ${NAME}_py_3_11:latest >/dev/null 2>&1; then $(MAKE) build_3_11; fi
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_11:latest --model /tests/models/model_3_11_legacy.pkl
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_11:latest --model /tests/models/model_3_11.pkl
+	docker run -i --rm --entrypoint python -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_11:latest -m unittest tests.test_predict
 
 .PHONY: test_3_12
 test_3_12: ## Test Python 3.12 pickle
 	@if ! docker image inspect ${NAME}_py_3_12:latest >/dev/null 2>&1; then $(MAKE) build_3_12; fi
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_12:latest --model /tests/models/model_3_12_legacy.pkl
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_12:latest --model /tests/models/model_3_12.pkl
+	docker run -i --rm --entrypoint python -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_12:latest -m unittest tests.test_predict
 
 .PHONY: test_3_13
 test_3_13: ## Test Python 3.13 pickle
 	@if ! docker image inspect ${NAME}_py_3_13:latest >/dev/null 2>&1; then $(MAKE) build_3_13; fi
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_13:latest --model /tests/models/model_3_13_legacy.pkl
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_13:latest --model /tests/models/model_3_13.pkl
+	docker run -i --rm --entrypoint python -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_13:latest -m unittest tests.test_predict
 
 .PHONY: test_3_14
 test_3_14: ## Test Python 3.14 pickle
 	@if ! docker image inspect ${NAME}_py_3_14:latest >/dev/null 2>&1; then $(MAKE) build_3_14; fi
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_14:latest --model /tests/models/model_3_14_legacy.pkl
-	docker run -i --rm -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_14:latest --model /tests/models/model_3_14.pkl
+	docker run -i --rm --entrypoint python -v ./tests/:/tests/ -v /tmp:/tmp ${NAME}_py_3_14:latest -m unittest tests.test_predict
 
 .PHONY: push_latest
 push_latest: push_latest_3_10 push_latest_3_11 push_latest_3_12 push_latest_3_13 push_latest_3_14 ## Push latest docker containers

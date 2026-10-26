@@ -42,7 +42,9 @@ docker run -i --rm -v "$PWD:$PWD" ghcr.io/numerai/numerai_predict_py_3_13:stable
 The dataset and benchmark defaults use `v6.0`. V6 is the same data as Signals v3.1:
 tickers and dates are columns, not the parquet row index. Train on numeric features;
 `feature_country` is text. Benchmark inputs also contain `numerai_ticker` and `date`.
-Align benchmarks by those keys when using them in a model.
+The runner requires benchmark ticker/date keys and index labels to match live
+rows in order before calling a two-argument model. Mismatched files fail rather
+than attaching live identity to a different benchmark row.
 
 Return a DataFrame containing predictions between 0 and 1, preserving every input
 row index exactly once. Reordering rows is allowed if their index labels stay intact.

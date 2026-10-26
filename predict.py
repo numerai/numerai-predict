@@ -259,6 +259,15 @@ def main(args):
         if num_args == 1:
             predictions = model(live_features)
         elif num_args == 2:
+            if live_identity is not None and (
+                not benchmark_models.index.equals(live_identity.index)
+                or not benchmark_models[identity_columns]
+                .astype(str)
+                .equals(live_identity.astype(str))
+            ):
+                raise ValueError(
+                    "v6 benchmark rows must match live ticker/date and index order"
+                )
             predictions = model(live_features, benchmark_models)
         else:
             logging.error(

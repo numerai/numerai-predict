@@ -238,6 +238,30 @@ class TestPredict(unittest.TestCase):
                 self.assertEqual(output["numerai_ticker"].tolist(), ["A US", "B US"])
                 self.assertEqual(output["date"].tolist(), ["2026-01-02"] * 2)
 
+    def test_v6_rejects_misaligned_benchmarks(self):
+        features = pd.DataFrame(
+            {"numerai_ticker": ["A US", "B US"], "date": ["2026-01-02"] * 2}
+        )
+        benchmarks = features.assign(lgbm_jupiter_60=[0.3, 0.7])
+
+        def model(live_features, live_benchmarks):
+            return live_benchmarks[["lgbm_jupiter_60"]].rename(
+                columns={"lgbm_jupiter_60": "prediction"}
+            )
+
+        for mismatched in (
+            benchmarks.iloc[::-1].reset_index(drop=True),
+            benchmarks.set_axis([2, 3]),
+            benchmarks.assign(date="2026-01-09"),
+        ):
+            with (
+                self.subTest(benchmarks=mismatched.to_dict()),
+                self.assertRaises(SystemExit),
+            ):
+                self.run_serialized_model(
+                    features, mismatched, cloudpickle.dumps(model)
+                )
+
     def test_existing_runtime_pickles_with_legacy_inputs(self):
         version = f"{sys.version_info.major}_{sys.version_info.minor}"
         for path in (Path(__file__).parent / "models").glob(f"model_{version}*.pkl"):

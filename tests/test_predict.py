@@ -243,7 +243,6 @@ class TestPredict(unittest.TestCase):
         for path in (Path(__file__).parent / "models").glob(f"model_{version}*.pkl"):
             with self.subTest(pickle=path.name):
                 model = pd.read_pickle(path)
-                # Existing fixtures are LightGBM models trained on v5 features.
                 features = pd.DataFrame(
                     0.5,
                     columns=model.__globals__["features"],

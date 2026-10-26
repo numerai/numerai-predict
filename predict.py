@@ -249,7 +249,6 @@ def main(args):
         benchmark_models = get_data(args.benchmarks, args.output_dir)
 
     logging.info("Predicting on %s rows of live features", len(live_features))
-    # Keep identity even if the user's function modifies its input DataFrame.
     identity_columns = ["numerai_ticker", "date"]
     live_identity = (
         live_features[identity_columns].copy()
@@ -279,8 +278,6 @@ def main(args):
         elif len(predictions) == 0:
             logging.error("Pickle function returned 0 predictions")
             exit_with_help(1)
-        # Unity files have row indexes rather than the legacy stock-ID index.
-        # Preserve identity for both live submissions and dated diagnostics.
         if live_identity is not None:
             if (
                 not live_identity.index.is_unique

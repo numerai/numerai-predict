@@ -245,7 +245,7 @@ class TestPredict(unittest.TestCase):
                 model = pd.read_pickle(path)
                 features = pd.DataFrame(
                     0.5,
-                    columns=model.__globals__["features"],
+                    columns=model.__globals__.get("features", ["feature_numeric"]),
                     index=pd.Index(["n1", "n2"], name="id"),
                 )
                 output = self.run_serialized_model(

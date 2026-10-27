@@ -110,23 +110,32 @@ class TestPredict(unittest.TestCase):
             predict.py_version(),
         )
 
-    def run_model(self, features, model):
+    def run_model(self, features, model, post_url=None):
         with tempfile.TemporaryDirectory() as directory:
             args = argparse.Namespace(
                 dataset="live.parquet",
                 benchmarks="live_benchmark_models.parquet",
                 model="model.pkl",
                 output_dir=directory,
-                post_url=None,
+                post_url=post_url,
                 post_data=None,
                 debug=False,
             )
             with (
                 mock.patch("predict.pd.read_pickle", return_value=model),
                 mock.patch("predict.get_data", return_value=features),
+                mock.patch(
+                    "predict.requests.post",
+                    return_value=mock.Mock(status_code=204),
+                ) as post,
             ):
                 predict.main(args)
-            return pd.read_csv(next(Path(directory).glob("live_predictions-*.csv")))
+            output = pd.read_csv(next(Path(directory).glob("live_predictions-*.csv")))
+            if post_url:
+                post.assert_called_once()
+                uploaded = pd.read_csv(post.call_args.kwargs["files"]["file"][1])
+                pd.testing.assert_frame_equal(uploaded, output)
+            return output
 
     def test_v6_output_keeps_ticker_and_date_when_predictions_are_reordered(self):
         features = pd.DataFrame(
@@ -137,7 +146,10 @@ class TestPredict(unittest.TestCase):
         def model(live_features):
             return pd.DataFrame({"prediction": [0.8, 0.2]}, index=[9, 7])
 
-        output = self.run_model(features, model)
+        output = self.run_model(features, model, post_url="https://example.com")
+        self.assertEqual(
+            output.columns.tolist(), ["numerai_ticker", "prediction", "date"]
+        )
         self.assertEqual(output["numerai_ticker"].tolist(), ["B US", "A US"])
         self.assertEqual(output["date"].tolist(), ["2026-01-02"] * 2)
         self.assertEqual(output["prediction"].tolist(), [0.8, 0.2])
@@ -201,7 +213,7 @@ class TestPredict(unittest.TestCase):
         def model(live_features):
             return pd.DataFrame({"prediction": [0.2, 0.8]}, index=live_features.index)
 
-        output = self.run_model(features, model)
+        output = self.run_model(features, model, post_url="https://example.com")
         self.assertEqual(
             output.to_dict("list"), {"id": ["n1", "n2"], "prediction": [0.2, 0.8]}
         )

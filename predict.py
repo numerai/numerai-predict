@@ -328,6 +328,9 @@ def main(args):
         logging.exception(e)
         exit_with_help(1)
 
+    if live_identity is not None:
+        predictions = predictions.set_index("numerai_ticker")
+
     logging.info("Generated %s predictions", len(predictions))
     logging.debug(predictions)
 

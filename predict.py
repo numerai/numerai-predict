@@ -21,12 +21,12 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dataset",
-        default="v5.3/live.parquet",
+        default="v6.0/live.parquet",
         help="Numerapi dataset path or local file.",
     )
     parser.add_argument(
         "--benchmarks",
-        default="v5.3/live_benchmark_models.parquet",
+        default="v6.0/live_benchmark_models.parquet",
         help="Numerapi benchmark model path or local file.",
     )
     parser.add_argument("--model", required=True, help="Pickled model file or URL")
@@ -249,10 +249,25 @@ def main(args):
         benchmark_models = get_data(args.benchmarks, args.output_dir)
 
     logging.info("Predicting on %s rows of live features", len(live_features))
+    identity_columns = ["numerai_ticker", "date"]
+    live_identity = (
+        live_features[identity_columns].copy()
+        if all(column in live_features for column in identity_columns)
+        else None
+    )
     try:
         if num_args == 1:
             predictions = model(live_features)
         elif num_args == 2:
+            if live_identity is not None and (
+                not benchmark_models.index.equals(live_identity.index)
+                or not benchmark_models[identity_columns]
+                .astype(str)
+                .equals(live_identity.astype(str))
+            ):
+                raise ValueError(
+                    "v6 benchmark rows must match live ticker/date and index order"
+                )
             predictions = model(live_features, benchmark_models)
         else:
             logging.error(
@@ -272,7 +287,31 @@ def main(args):
         elif len(predictions) == 0:
             logging.error("Pickle function returned 0 predictions")
             exit_with_help(1)
-        elif predictions.isna().any().any():
+        if live_identity is not None:
+            if (
+                not live_identity.index.is_unique
+                or not predictions.index.is_unique
+                or len(predictions) != len(live_identity)
+                or not predictions.index.isin(live_identity.index).all()
+            ):
+                raise ValueError(
+                    "v6 predictions must preserve every input row index exactly once"
+                )
+            identity = live_identity.loc[predictions.index]
+            for column in identity_columns:
+                if (
+                    column in predictions
+                    and not predictions[column]
+                    .astype(str)
+                    .eq(identity[column].astype(str))
+                    .all()
+                ):
+                    raise ValueError(f"v6 output {column} does not match its input row")
+            predictions = predictions.drop(
+                columns=identity_columns, errors="ignore"
+            ).join(identity)
+
+        if predictions.isna().any().any():
             logging.error("Pickle function returned at least 1 NaN prediction")
             exit_with_help(1)
         elif not (predictions.iloc[:, 0].between(0, 1).all().all()):
@@ -288,6 +327,9 @@ def main(args):
     except Exception as e:
         logging.exception(e)
         exit_with_help(1)
+
+    if live_identity is not None:
+        predictions = predictions.set_index("numerai_ticker")
 
     logging.info("Generated %s predictions", len(predictions))
     logging.debug(predictions)

@@ -3,6 +3,7 @@ Set up python unittests for the predict module
 """
 
 import argparse
+
 from pathlib import Path
 import sys
 import tempfile

